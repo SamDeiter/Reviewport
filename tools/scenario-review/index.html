@@ -259,8 +259,8 @@
       const stepsObj = scenario.steps || {};
       
       viewer.innerHTML = Object.entries(stepsObj).map(([stepId, step]) => {
-        const imagePath = `../../assets/generated/${id}/${stepId}.jpg`;
-        const pngPath = `../../assets/generated/${id}/${stepId}.png`;
+        const imagePath = `https://samdeiter.github.io/UE5ScenarioTracker/assets/generated/${id}/${stepId}.jpg`;
+        const pngPath = `https://samdeiter.github.io/UE5ScenarioTracker/assets/generated/${id}/${stepId}.png`;
         const fb = feedback[id]?.[stepId] || {};
         
         const choicesHtml = (step.choices || []).map(c => `

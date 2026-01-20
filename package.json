@@ -1,0 +1,13 @@
+{
+  "name": "reviewport",
+  "version": "1.0.0",
+  "description": "UE5 Educational Tools Hub",
+  "private": true,
+  "homepage": "https://samdeiter.github.io/Reviewport/",
+  "scripts": {
+    "deploy": "gh-pages -d ."
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
+  }
+}

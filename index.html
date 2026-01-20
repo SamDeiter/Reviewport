@@ -718,7 +718,11 @@
     <header>
       <div class="logo">
         <div class="logo-icon">
-          <img src="logos/UE-Icon-2023-White.svg" alt="UE5" style="width: 32px; height: 32px;">
+          <img
+            src="logos/UE-Icon-2023-White.svg"
+            alt="UE5"
+            style="width: 32px; height: 32px"
+          />
         </div>
         <div>
           <div class="logo-text">Reviewport</div>
@@ -733,13 +737,27 @@
     <!-- Login Overlay -->
     <div class="login-overlay" id="login-overlay">
       <div class="login-card">
-        <div style="margin: 0 auto 1.5rem;">
-          <img src="logos/UE-Icon-2023-White.svg" alt="UE5" style="width: 80px; height: 80px;">
+        <div style="margin: 0 auto 1.5rem">
+          <img
+            src="logos/UE-Icon-2023-White.svg"
+            alt="UE5"
+            style="width: 80px; height: 80px"
+          />
         </div>
         <h2>Welcome to Reviewport</h2>
-        <p>Sign in with your Epic Games Google account to access the UE5 Educational Tools Hub.</p>
-        <button class="google-signin-btn" id="google-signin-btn" onclick="signInWithGoogle()">
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        <p>
+          Sign in with your Epic Games Google account to access the UE5
+          Educational Tools Hub.
+        </p>
+        <button
+          class="google-signin-btn"
+          id="google-signin-btn"
+          onclick="signInWithGoogle()"
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google"
+          />
           Sign in with Google
         </button>
         <div class="auth-error hidden" id="auth-error"></div>
@@ -752,322 +770,430 @@
 
     <!-- App Content (hidden until authenticated) -->
     <div class="app-content" id="app-content">
-    <main>
-      <section class="hero">
-        <h1>UE5 Educational Tools Hub</h1>
-        <p>
-          Review, track, and manage all your Unreal Engine 5 educational content
-          from one central location.
-        </p>
-      </section>
-
-      <div class="stats-bar">
-        <div class="stat">
-          <div class="stat-value" id="scenario-count">21</div>
-          <div class="stat-label">Scenarios</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="question-count">0</div>
-          <div class="stat-label">Questions</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value" id="review-count">0</div>
-          <div class="stat-label">Reviews Pending</div>
-        </div>
-        <div class="stat">
-          <div class="stat-value">3</div>
-          <div class="stat-label">Active Tools</div>
-        </div>
-      </div>
-
-      <h2 class="section-title">
-        <i class="fas fa-tools"></i>
-        Educational Tools
-      </h2>
-
-      <div class="tools-grid">
-        <!-- Blueprint Editor -->
-        <div class="tool-card blueprint" onclick="launchTool('blueprint')">
-          <div class="tool-header">
-            <div class="tool-icon">
-              <i class="fas fa-project-diagram"></i>
-            </div>
-            <div class="tool-status" id="blueprint-status">
-              <span class="dot"></span>
-              Online
-            </div>
-          </div>
-          <h3 class="tool-title">Blueprint Editor</h3>
-          <p class="tool-description">
-            Interactive visual scripting environment that replicates UE5's
-            Blueprint system. Perfect for teaching BP fundamentals.
+      <main>
+        <section class="hero">
+          <h1>UE5 Educational Tools Hub</h1>
+          <p>
+            Review, track, and manage all your Unreal Engine 5 educational
+            content from one central location.
           </p>
-          <div class="tool-stats">
-            <span><i class="fas fa-cube"></i> 27 Tasks</span>
-            <span><i class="fas fa-bug"></i> 5 BP Scenarios</span>
+        </section>
+
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-value" id="scenario-count">21</div>
+            <div class="stat-label">Scenarios</div>
           </div>
-          <div class="tool-actions">
-            <button
-              class="btn btn-primary"
-              onclick="
-                event.stopPropagation();
-                launchTool('blueprint');
-              "
-            >
-              <i class="fas fa-play"></i> Launch
-            </button>
-            <button
-              class="btn btn-secondary"
-              onclick="
-                event.stopPropagation();
-                launchTool('blueprint-review');
-              "
-            >
-              <i class="fas fa-search"></i> Review Mode
-            </button>
+          <div class="stat">
+            <div class="stat-value" id="question-count">0</div>
+            <div class="stat-label">Questions</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="review-count">0</div>
+            <div class="stat-label">Reviews Pending</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Active Tools</div>
           </div>
         </div>
 
-        <!-- Scenario Tracker -->
-        <div class="tool-card scenario" onclick="launchTool('scenario')">
-          <div class="tool-header">
-            <div class="tool-icon">
-              <i class="fas fa-map-marked-alt"></i>
-            </div>
-            <div class="tool-status" id="scenario-status">
-              <span class="dot"></span>
-              Online
-            </div>
-          </div>
-          <h3 class="tool-title">Scenario Tracker</h3>
-          <p class="tool-description">
-            Comprehensive library of real-world UE5 troubleshooting scenarios
-            across 5 disciplines. Track progress and validate learning.
-          </p>
-          <div class="tool-stats">
-            <span><i class="fas fa-folder"></i> 5 Disciplines</span>
-            <span><i class="fas fa-file-alt"></i> 45 Scenarios</span>
-            <span><i class="fas fa-check-circle"></i> 0 Reviewed</span>
-          </div>
-          <div class="tool-actions">
-            <button
-              class="btn btn-primary"
-              onclick="
-                event.stopPropagation();
-                launchTool('scenario');
-              "
-            >
-              <i class="fas fa-play"></i> Launch
-            </button>
-            <button
-              class="btn btn-secondary"
-              onclick="
-                event.stopPropagation();
-                launchTool('scenario-review');
-              "
-            >
-              <i class="fas fa-search"></i> Review Mode
-            </button>
-          </div>
-        </div>
-
-        <!-- Question Generator -->
-        <div class="tool-card question" onclick="launchTool('question')">
-          <div class="tool-header">
-            <div class="tool-icon">
-              <i class="fas fa-question-circle"></i>
-            </div>
-            <div class="tool-status offline" id="question-status">
-              <span class="dot"></span>
-              Offline
-            </div>
-          </div>
-          <h3 class="tool-title">Question Generator</h3>
-          <p class="tool-description">
-            AI-powered quiz generation tool that creates multiple-choice
-            questions from UE5 documentation with source verification.
-          </p>
-          <div class="tool-stats">
-            <span
-              ><i class="fas fa-list"></i>
-              <span id="question-card-count">...</span> Questions</span
-            >
-            <span
-              ><i class="fas fa-check-circle"></i>
-              <span id="verified-count">...</span> Verified</span
-            >
-            <span
-              ><i class="fas fa-clock"></i>
-              <span id="pending-count">...</span> Pending</span
-            >
-          </div>
-          <div class="tool-actions">
-            <button
-              class="btn btn-primary"
-              onclick="
-                event.stopPropagation();
-                launchTool('question');
-              "
-            >
-              <i class="fas fa-play"></i> Launch
-            </button>
-            <button
-              class="btn btn-secondary"
-              onclick="
-                event.stopPropagation();
-                launchTool('question-review');
-              "
-            >
-              <i class="fas fa-search"></i> Review Mode
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Unified Access Management (Admins Only) -->
-      <section class="admin-section" id="admin-panel">
         <h2 class="section-title">
-          <i class="fas fa-user-shield"></i>
-          Unified Access Management
+          <i class="fas fa-tools"></i>
+          Educational Tools
         </h2>
-        
-        <div class="admin-grid">
-          <!-- Invite Generator -->
-          <div class="admin-card">
-            <h3><i class="fas fa-plus-circle"></i> Create Reviewer Invite</h3>
-            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-              Select the tools this reviewer should have access to. Each link is single-use.
-            </p>
-            
-            <div class="tool-selector">
-              <label class="tool-checkbox">
-                <input type="checkbox" name="tool" value="questions" checked>
-                <div>
-                  <div style="font-weight: 500;">Question Generator</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary);">AI-powered MCQ generation & verification</div>
-                </div>
-              </label>
-              <label class="tool-checkbox">
-                <input type="checkbox" name="tool" value="blueprint">
-                <div>
-                  <div style="font-weight: 500;">Blueprint Editor</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary);">Visual scripting review scenarios</div>
-                </div>
-              </label>
-              <label class="tool-checkbox">
-                <input type="checkbox" name="tool" value="scenario">
-                <div>
-                  <div style="font-weight: 500;">Scenario Tracker</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary);">Text-based troubleshooting reviews</div>
-                </div>
-              </label>
-               <label class="tool-checkbox">
-                <input type="checkbox" name="tool" value="materials">
-                <div>
-                  <div style="font-weight: 500;">Materials Hub</div>
-                  <div style="font-size: 0.75rem; color: var(--text-secondary);">Shader & material logic evaluation</div>
-                </div>
-              </label>
-            </div>
-            
-            <button class="btn btn-primary system-btn" onclick="generateInviteLink()">
-              <i class="fas fa-link"></i> Generate Invite Link
-            </button>
 
-            <div class="invite-link-area" id="invite-link-area">
-              <div style="font-size: 0.75rem; color: var(--accent-green); margin-top: 1rem;">Invite Code Generated:</div>
-              <div class="copy-area">
-                <input type="text" class="copy-input" id="invite-url" readonly>
-                <button class="btn btn-secondary" onclick="copyInviteUrl()">
-                  <i class="fas fa-copy"></i>
+        <div class="tools-grid">
+          <!-- Blueprint Editor -->
+          <div class="tool-card blueprint" onclick="launchTool('blueprint')">
+            <div class="tool-header">
+              <div class="tool-icon">
+                <i class="fas fa-project-diagram"></i>
+              </div>
+              <div class="tool-status" id="blueprint-status">
+                <span class="dot"></span>
+                Online
+              </div>
+            </div>
+            <h3 class="tool-title">Blueprint Editor</h3>
+            <p class="tool-description">
+              Interactive visual scripting environment that replicates UE5's
+              Blueprint system. Perfect for teaching BP fundamentals.
+            </p>
+            <div class="tool-stats">
+              <span><i class="fas fa-cube"></i> 27 Tasks</span>
+              <span><i class="fas fa-bug"></i> 5 BP Scenarios</span>
+            </div>
+            <div class="tool-actions">
+              <button
+                class="btn btn-primary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('blueprint');
+                "
+              >
+                <i class="fas fa-play"></i> Launch
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('blueprint-review');
+                "
+              >
+                <i class="fas fa-search"></i> Review Mode
+              </button>
+            </div>
+          </div>
+
+          <!-- Scenario Tracker -->
+          <div class="tool-card scenario" onclick="launchTool('scenario')">
+            <div class="tool-header">
+              <div class="tool-icon">
+                <i class="fas fa-map-marked-alt"></i>
+              </div>
+              <div class="tool-status" id="scenario-status">
+                <span class="dot"></span>
+                Online
+              </div>
+            </div>
+            <h3 class="tool-title">Scenario Tracker</h3>
+            <p class="tool-description">
+              Comprehensive library of real-world UE5 troubleshooting scenarios
+              across 5 disciplines. Track progress and validate learning.
+            </p>
+            <div class="tool-stats">
+              <span><i class="fas fa-folder"></i> 5 Disciplines</span>
+              <span><i class="fas fa-file-alt"></i> 45 Scenarios</span>
+              <span><i class="fas fa-check-circle"></i> 0 Reviewed</span>
+            </div>
+            <div class="tool-actions">
+              <button
+                class="btn btn-primary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('scenario');
+                "
+              >
+                <i class="fas fa-play"></i> Launch
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('scenario-review');
+                "
+              >
+                <i class="fas fa-search"></i> Review Mode
+              </button>
+            </div>
+          </div>
+
+          <!-- Question Generator -->
+          <div class="tool-card question" onclick="launchTool('question')">
+            <div class="tool-header">
+              <div class="tool-icon">
+                <i class="fas fa-question-circle"></i>
+              </div>
+              <div class="tool-status offline" id="question-status">
+                <span class="dot"></span>
+                Offline
+              </div>
+            </div>
+            <h3 class="tool-title">Question Generator</h3>
+            <p class="tool-description">
+              AI-powered quiz generation tool that creates multiple-choice
+              questions from UE5 documentation with source verification.
+            </p>
+            <div class="tool-stats">
+              <span
+                ><i class="fas fa-list"></i>
+                <span id="question-card-count">...</span> Questions</span
+              >
+              <span
+                ><i class="fas fa-check-circle"></i>
+                <span id="verified-count">...</span> Verified</span
+              >
+              <span
+                ><i class="fas fa-clock"></i>
+                <span id="pending-count">...</span> Pending</span
+              >
+            </div>
+            <div class="tool-actions">
+              <button
+                class="btn btn-primary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('question');
+                "
+              >
+                <i class="fas fa-play"></i> Launch
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('question-review');
+                "
+              >
+                <i class="fas fa-search"></i> Review Mode
+              </button>
+            </div>
+          </div>
+
+          <!-- Material Editor -->
+          <div class="tool-card material" onclick="launchTool('materials')">
+            <div class="tool-header">
+              <div class="tool-icon">
+                <i class="fas fa-palette"></i>
+              </div>
+              <div class="tool-status" id="materials-status">
+                <span class="dot"></span>
+                Available
+              </div>
+            </div>
+            <h3 class="tool-title">Material Editor</h3>
+            <p class="tool-description">
+              Visual shader and material graph editor replicating UE5's Material
+              Editor. Perfect for teaching material creation workflows.
+            </p>
+            <div class="tool-stats">
+              <span><i class="fas fa-cube"></i> Node-Based</span>
+              <span><i class="fas fa-eye"></i> Live Preview</span>
+            </div>
+            <div class="tool-actions">
+              <button
+                class="btn btn-primary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('materials');
+                "
+              >
+                <i class="fas fa-play"></i> Launch
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('materials-review');
+                "
+              >
+                <i class="fas fa-search"></i> Review Mode
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unified Access Management (Admins Only) -->
+        <section class="admin-section" id="admin-panel">
+          <h2 class="section-title">
+            <i class="fas fa-user-shield"></i>
+            Unified Access Management
+          </h2>
+
+          <div class="admin-grid">
+            <!-- Invite Generator -->
+            <div class="admin-card">
+              <h3><i class="fas fa-plus-circle"></i> Create Reviewer Invite</h3>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 1.5rem;
+                "
+              >
+                Select the tools this reviewer should have access to. Each link
+                is single-use.
+              </p>
+
+              <div class="tool-selector">
+                <label class="tool-checkbox">
+                  <input
+                    type="checkbox"
+                    name="tool"
+                    value="questions"
+                    checked
+                  />
+                  <div>
+                    <div style="font-weight: 500">Question Generator</div>
+                    <div
+                      style="font-size: 0.75rem; color: var(--text-secondary)"
+                    >
+                      AI-powered MCQ generation & verification
+                    </div>
+                  </div>
+                </label>
+                <label class="tool-checkbox">
+                  <input type="checkbox" name="tool" value="blueprint" />
+                  <div>
+                    <div style="font-weight: 500">Blueprint Editor</div>
+                    <div
+                      style="font-size: 0.75rem; color: var(--text-secondary)"
+                    >
+                      Visual scripting review scenarios
+                    </div>
+                  </div>
+                </label>
+                <label class="tool-checkbox">
+                  <input type="checkbox" name="tool" value="scenario" />
+                  <div>
+                    <div style="font-weight: 500">Scenario Tracker</div>
+                    <div
+                      style="font-size: 0.75rem; color: var(--text-secondary)"
+                    >
+                      Text-based troubleshooting reviews
+                    </div>
+                  </div>
+                </label>
+                <label class="tool-checkbox">
+                  <input type="checkbox" name="tool" value="materials" />
+                  <div>
+                    <div style="font-weight: 500">Materials Hub</div>
+                    <div
+                      style="font-size: 0.75rem; color: var(--text-secondary)"
+                    >
+                      Shader & material logic evaluation
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <button
+                class="btn btn-primary system-btn"
+                onclick="generateInviteLink()"
+              >
+                <i class="fas fa-link"></i> Generate Invite Link
+              </button>
+
+              <div class="invite-link-area" id="invite-link-area">
+                <div
+                  style="
+                    font-size: 0.75rem;
+                    color: var(--accent-green);
+                    margin-top: 1rem;
+                  "
+                >
+                  Invite Code Generated:
+                </div>
+                <div class="copy-area">
+                  <input
+                    type="text"
+                    class="copy-input"
+                    id="invite-url"
+                    readonly
+                  />
+                  <button class="btn btn-secondary" onclick="copyInviteUrl()">
+                    <i class="fas fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Migration Tools -->
+            <div class="admin-card">
+              <h3><i class="fas fa-database"></i> System Tools</h3>
+              <p
+                style="
+                  font-size: 0.875rem;
+                  color: var(--text-secondary);
+                  margin-bottom: 1.5rem;
+                "
+              >
+                Critical system maintenance and initialization tools.
+              </p>
+              <div class="admin-actions">
+                <button
+                  class="btn btn-secondary system-btn"
+                  onclick="runAccessMigration()"
+                >
+                  <i class="fas fa-sync-alt"></i> Run Access Migration (Legacy
+                  Users)
                 </button>
+                <button
+                  class="btn btn-secondary system-btn"
+                  onclick="seedToolRegistry()"
+                >
+                  <i class="fas fa-seedling"></i> Seed Tool Registry
+                </button>
+                <div
+                  id="system-status"
+                  style="
+                    font-size: 0.75rem;
+                    margin-top: 1rem;
+                    text-align: center;
+                  "
+                ></div>
               </div>
             </div>
           </div>
+        </section>
 
-          <!-- System Migration Tools -->
-          <div class="admin-card">
-            <h3><i class="fas fa-database"></i> System Tools</h3>
-            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-              Critical system maintenance and initialization tools.
-            </p>
-            <div class="admin-actions">
-              <button class="btn btn-secondary system-btn" onclick="runAccessMigration()">
-                <i class="fas fa-sync-alt"></i> Run Access Migration (Legacy Users)
-              </button>
-              <button class="btn btn-secondary system-btn" onclick="seedToolRegistry()">
-                <i class="fas fa-seedling"></i> Seed Tool Registry
-              </button>
-              <div id="system-status" style="font-size: 0.75rem; margin-top: 1rem; text-align: center;"></div>
-            </div>
-          </div>
+        <!-- Quick Actions -->
+        <h2 class="section-title">
+          <i class="fas fa-bolt"></i>
+          Quick Actions
+        </h2>
+
+        <div class="quick-actions">
+          <a
+            class="quick-action"
+            href="https://samdeiter.github.io/UE5LMSBlueprint/?mode=review"
+            target="_blank"
+          >
+            <i class="fas fa-clipboard-check"></i>
+            <h4>Review Blueprint Scenarios</h4>
+            <p>Open Blueprint Editor in Review Mode</p>
+          </a>
+          <a
+            class="quick-action"
+            href="./tools/scenario-review/index.html"
+            target="_blank"
+          >
+            <i class="fas fa-edit"></i>
+            <h4>Review Text Scenarios</h4>
+            <p>Open Scenario Tracker for text reviews</p>
+          </a>
+          <a
+            class="quick-action"
+            href="#"
+            onclick="
+              exportReport();
+              return false;
+            "
+          >
+            <i class="fas fa-file-export"></i>
+            <h4>Export Review Report</h4>
+            <p>Generate a summary of all reviews</p>
+          </a>
+          <a
+            class="quick-action"
+            href="https://drive.google.com/drive/folders/1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH"
+            target="_blank"
+          >
+            <i class="fab fa-google-drive"></i>
+            <h4>Open Drive Folder</h4>
+            <p>View screenshots and review data</p>
+          </a>
         </div>
-      </section>
+      </main>
 
-      <!-- Quick Actions -->
-      <h2 class="section-title">
-        <i class="fas fa-bolt"></i>
-        Quick Actions
-      </h2>
-
-      <div class="quick-actions">
-        <a
-          class="quick-action"
-          href="https://samdeiter.github.io/UE5LMSBlueprint/?mode=review"
-          target="_blank"
-        >
-          <i class="fas fa-clipboard-check"></i>
-          <h4>Review Blueprint Scenarios</h4>
-          <p>Open Blueprint Editor in Review Mode</p>
-        </a>
-        <a
-          class="quick-action"
-          href="./tools/scenario-review/index.html"
-          target="_blank"
-        >
-          <i class="fas fa-edit"></i>
-          <h4>Review Text Scenarios</h4>
-          <p>Open Scenario Tracker for text reviews</p>
-        </a>
-        <a
-          class="quick-action"
-          href="#"
-          onclick="
-            exportReport();
-            return false;
-          "
-        >
-          <i class="fas fa-file-export"></i>
-          <h4>Export Review Report</h4>
-          <p>Generate a summary of all reviews</p>
-        </a>
-        <a
-          class="quick-action"
-          href="https://drive.google.com/drive/folders/1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH"
-          target="_blank"
-        >
-          <i class="fab fa-google-drive"></i>
-          <h4>Open Drive Folder</h4>
-          <p>View screenshots and review data</p>
-        </a>
-      </div>
-    </main>
-
-    <footer>
-      <p>Reviewport v0.2.1 &bull; Built for Epic Games Learning Team</p>
-      <p style="margin-top: 0.5rem">
-        <a href="https://github.com/SamDeiter" target="_blank">GitHub</a> &bull;
-        <a
-          href="#"
-          onclick="
-            showDocs();
-            return false;
-          "
-          >Documentation</a
-        >
-      </p>
-    </footer>
-    </div><!-- End app-content -->
+      <footer>
+        <p>Reviewport v0.2.1 &bull; Built for Epic Games Learning Team</p>
+        <p style="margin-top: 0.5rem">
+          <a href="https://github.com/SamDeiter" target="_blank">GitHub</a>
+          &bull;
+          <a
+            href="#"
+            onclick="
+              showDocs();
+              return false;
+            "
+            >Documentation</a
+          >
+        </p>
+      </footer>
+    </div>
+    <!-- End app-content -->
 
     <script>
       // Tool URLs configuration
@@ -1076,10 +1202,14 @@
         "blueprint-review":
           "https://samdeiter.github.io/UE5LMSBlueprint/?mode=review",
         scenario: "https://samdeiter.github.io/UE5ScenarioTracker/",
-        "scenario-review": "https://samdeiter.github.io/UE5ScenarioTracker/?mode=review",
+        "scenario-review":
+          "https://samdeiter.github.io/UE5ScenarioTracker/?mode=review",
         question: "https://samdeiter.github.io/UE5QuestionGenerator/",
         "question-review":
           "https://samdeiter.github.io/UE5QuestionGenerator/?mode=review",
+        materials: "https://samdeiter.github.io/UE5LMSMaterials/",
+        "materials-review":
+          "https://samdeiter.github.io/UE5LMSMaterials/?mode=review",
       };
 
       // Google Drive configuration for screenshot storage
@@ -1094,7 +1224,10 @@
         if (!url) return;
 
         // 1. Epic Games employees have auto-access to everything
-        if (auth.currentUser && auth.currentUser.email.toLowerCase().endsWith("@epicgames.com")) {
+        if (
+          auth.currentUser &&
+          auth.currentUser.email.toLowerCase().endsWith("@epicgames.com")
+        ) {
           window.open(url, "_blank");
           return;
         }
@@ -1102,15 +1235,17 @@
         // 2. Check per-tool access for external users
         try {
           // Normalize toolId (e.g., 'blueprint-review' -> 'blueprint')
-          const baseToolId = toolId.split('-')[0];
-          
+          const baseToolId = toolId.split("-")[0];
+
           const checkAccessFn = functions.httpsCallable("checkToolAccess");
           const result = await checkAccessFn({ toolId: baseToolId });
-          
+
           if (result.data.hasAccess) {
             window.open(url, "_blank");
           } else {
-            alert(`Access Denied: You do not have permission to access the ${baseToolId} tool. Please request an invite link for this tool.`);
+            alert(
+              `Access Denied: You do not have permission to access the ${baseToolId} tool. Please request an invite link for this tool.`,
+            );
           }
         } catch (error) {
           console.error("[Access] Check failed:", error);
@@ -1163,8 +1298,14 @@
       // Since these are static GitHub Pages sites, they're always available
       async function checkToolStatus() {
         const tools = [
-          { id: "blueprint-status", url: "https://samdeiter.github.io/UE5LMSBlueprint/" },
-          { id: "scenario-status", url: "https://samdeiter.github.io/UE5ScenarioTracker/" },
+          {
+            id: "blueprint-status",
+            url: "https://samdeiter.github.io/UE5LMSBlueprint/",
+          },
+          {
+            id: "scenario-status",
+            url: "https://samdeiter.github.io/UE5ScenarioTracker/",
+          },
         ];
 
         for (const tool of tools) {
@@ -1208,7 +1349,7 @@
 
       // Allowed email domain
       const ALLOWED_DOMAIN = "@epicgames.com";
-      
+
       // Global Firebase references
       let auth, db;
 
@@ -1223,7 +1364,7 @@
             storageBucket: "ue5-questions-prod.firebasestorage.app",
             messagingSenderId: "15582589888",
             appId: "1:15582589888:web:b767b6bb3a16bf5f42695b5",
-            measurementId: "G-3L7FJ56DMH"
+            measurementId: "G-3L7FJ56DMH",
           };
 
           firebase.initializeApp(firebaseConfig);
@@ -1233,7 +1374,7 @@
 
           // Listen for auth state changes
           auth.onAuthStateChanged(handleAuthStateChange);
-          
+
           console.log("[Auth] Firebase initialized");
         } catch (error) {
           console.error("Firebase init error:", error);
@@ -1245,54 +1386,62 @@
         const loginOverlay = document.getElementById("login-overlay");
         const appContent = document.getElementById("app-content");
         const userArea = document.getElementById("user-area");
-        
+
         if (user) {
           // Check domain restriction
           const urlParams = new URLSearchParams(window.location.search);
-          const hasInvite = urlParams.has('invite');
-          
-          if (!hasInvite && !user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase())) {
-            console.warn(`[Auth] Rejected: ${user.email} (not ${ALLOWED_DOMAIN})`);
-            showAuthError(`Access restricted to ${ALLOWED_DOMAIN} accounts only. If you have an invite, please use the invite link.`);
+          const hasInvite = urlParams.has("invite");
+
+          if (
+            !hasInvite &&
+            !user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase())
+          ) {
+            console.warn(
+              `[Auth] Rejected: ${user.email} (not ${ALLOWED_DOMAIN})`,
+            );
+            showAuthError(
+              `Access restricted to ${ALLOWED_DOMAIN} accounts only. If you have an invite, please use the invite link.`,
+            );
             auth.signOut();
             return;
           }
-          
+
           // User is authenticated with valid domain
           console.log(`[Auth] Authenticated: ${user.email}`);
-          
+
           // Hide login, show content
           loginOverlay.classList.add("hidden");
           appContent.classList.add("visible");
-          
+
           // Update header with user info
           userArea.innerHTML = `
             <div class="user-profile">
-              <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="${user.displayName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=667eea&color=fff'">
+              <img src="${user.photoURL || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.displayName || "User")}" alt="${user.displayName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || "User")}&background=667eea&color=fff'">
               <span class="user-name">${user.displayName || user.email}</span>
               <button class="logout-btn" onclick="signOut()">Sign Out</button>
             </div>
           `;
-          
+
           // Load data now that user is authenticated
           loadQuestionStats();
           checkAdminAccess();
           checkInviteCode();
-          
         } else {
           // User is not authenticated
           console.log("[Auth] No user signed in");
-          
+
           // Check for invite in URL even if not signed in (to show login prompt)
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.has('invite')) {
-            showAuthError("You have an invite link! Please sign in with your Google account to accept it.");
+          if (urlParams.has("invite")) {
+            showAuthError(
+              "You have an invite link! Please sign in with your Google account to accept it.",
+            );
           }
-          
+
           // Show login, hide content
           loginOverlay.classList.remove("hidden");
           appContent.classList.remove("visible");
-          
+
           // Reset header
           userArea.innerHTML = "";
         }
@@ -1302,25 +1451,25 @@
         try {
           hideAuthError();
           const provider = new firebase.auth.GoogleAuthProvider();
-          
+
           // Only hint/force epicgames.com if NO invite is present.
           // Holders of specific tool invites can use personal accounts.
           const urlParams = new URLSearchParams(window.location.search);
-          if (!urlParams.has('invite')) {
+          if (!urlParams.has("invite")) {
             provider.setCustomParameters({
-              hd: 'epicgames.com',
-              prompt: 'select_account'
+              hd: "epicgames.com",
+              prompt: "select_account",
             });
           } else {
             provider.setCustomParameters({
-              prompt: 'select_account'
+              prompt: "select_account",
             });
           }
-          
+
           await auth.signInWithPopup(provider);
         } catch (error) {
           console.error("[Auth] Sign-in error:", error);
-          if (error.code === 'auth/popup-closed-by-user') {
+          if (error.code === "auth/popup-closed-by-user") {
             // User closed popup, don't show error
             return;
           }
@@ -1329,11 +1478,14 @@
       }
 
       function signOut() {
-        auth.signOut().then(() => {
-          console.log("[Auth] Signed out");
-        }).catch((error) => {
-          console.error("[Auth] Sign-out error:", error);
-        });
+        auth
+          .signOut()
+          .then(() => {
+            console.log("[Auth] Signed out");
+          })
+          .catch((error) => {
+            console.error("[Auth] Sign-out error:", error);
+          });
       }
 
       function showAuthError(message) {
@@ -1394,7 +1546,7 @@
       async function checkAdminAccess() {
         try {
           if (!auth.currentUser) return;
-          
+
           // Epic Games employees are auto-admins (frontend check for immediate UI)
           if (auth.currentUser.email.toLowerCase().endsWith("@epicgames.com")) {
             console.log("[Admin] Auto-access granted (Epic Employee)");
@@ -1405,9 +1557,9 @@
           const checkFn = functions.httpsCallable("checkUserRegistration");
           const result = await checkFn({});
           const userData = result.data;
-          
+
           console.log("[Admin] Registration check result:", userData);
-          
+
           if (userData && userData.role === "admin") {
             console.log("[Admin] Access detected via registry");
             document.getElementById("admin-panel").classList.add("visible");
@@ -1422,14 +1574,16 @@
       async function generateInviteLink() {
         const btn = event.target;
         const originalText = btn.innerHTML;
-        
+
         try {
           btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-          
-          const selectedTools = Array.from(document.querySelectorAll('input[name="tool"]:checked'))
-            .map(cb => cb.value);
-            
+          btn.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
+          const selectedTools = Array.from(
+            document.querySelectorAll('input[name="tool"]:checked'),
+          ).map((cb) => cb.value);
+
           if (selectedTools.length === 0) {
             alert("Please select at least one tool.");
             return;
@@ -1438,18 +1592,18 @@
           const createFn = functions.httpsCallable("createInvite");
           const result = await createFn({
             tools: selectedTools,
-            expiresInDays: 7
+            expiresInDays: 7,
           });
 
           if (result.data.success) {
             const inviteUrlArea = document.getElementById("invite-link-area");
             const inviteUrlInput = document.getElementById("invite-url");
-            
+
             // Construct the tool-specific landing URL
             // For now, we point them to Reviewport which will handle the invite consume flow
             const baseUrl = window.location.origin + window.location.pathname;
             const inviteUrl = `${baseUrl}?invite=${result.data.code}`;
-            
+
             inviteUrlInput.value = inviteUrl;
             inviteUrlArea.classList.add("visible");
           }
@@ -1466,12 +1620,12 @@
         const input = document.getElementById("invite-url");
         input.select();
         document.execCommand("copy");
-        
+
         const btn = event.currentTarget;
         const originalIcon = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i>';
         btn.style.color = "var(--accent-green)";
-        
+
         setTimeout(() => {
           btn.innerHTML = originalIcon;
           btn.style.color = "";
@@ -1479,16 +1633,23 @@
       }
 
       async function runAccessMigration() {
-        if (!confirm("This will add 'questions' tool access to all existing users. Proceed?")) return;
-        
+        if (
+          !confirm(
+            "This will add 'questions' tool access to all existing users. Proceed?",
+          )
+        )
+          return;
+
         const statusEl = document.getElementById("system-status");
         try {
           statusEl.textContent = "Running migration...";
           statusEl.style.color = "var(--accent-blue)";
-          
-          const migrateFn = functions.httpsCallable("runUnifiedAccessMigration");
+
+          const migrateFn = functions.httpsCallable(
+            "runUnifiedAccessMigration",
+          );
           const result = await migrateFn({});
-          
+
           statusEl.textContent = `Migration complete: ${result.data.message}`;
           statusEl.style.color = "var(--accent-green)";
         } catch (error) {
@@ -1503,10 +1664,10 @@
         try {
           statusEl.textContent = "Seeding registry...";
           statusEl.style.color = "var(--accent-blue)";
-          
+
           const seedFn = functions.httpsCallable("seedToolRegistry");
           const result = await seedFn({});
-          
+
           statusEl.textContent = `Registry seeded: ${result.data.message}`;
           statusEl.style.color = "var(--accent-green)";
         } catch (error) {
@@ -1518,31 +1679,44 @@
 
       async function checkInviteCode() {
         const urlParams = new URLSearchParams(window.location.search);
-        const inviteCode = urlParams.get('invite');
-        
+        const inviteCode = urlParams.get("invite");
+
         if (!inviteCode || !auth.currentUser) return;
-        
+
         try {
           console.log(`[Invite] Attempting to consume code: ${inviteCode}`);
           const consumeFn = functions.httpsCallable("consumeInvite");
           const result = await consumeFn({ code: inviteCode });
-          
+
           if (result.data && result.data.success) {
             const tools = result.data.tools || [];
-            const toolsString = tools.length > 0 ? tools.join(', ') : "default tools";
-            alert(`Success! You have been granted access to: ${toolsString}\n\nYou can now launch these tools from the hub.`);
-            
+            const toolsString =
+              tools.length > 0 ? tools.join(", ") : "default tools";
+            alert(
+              `Success! You have been granted access to: ${toolsString}\n\nYou can now launch these tools from the hub.`,
+            );
+
             // Clear the URL parameter
-            window.history.replaceState({}, document.title, window.location.pathname);
-            
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname,
+            );
+
             // Re-check admin status and refresh stats (might have gained permissions)
             checkAdminAccess();
           }
         } catch (error) {
           console.error("[Invite] Consumption error:", error);
-          alert("Failed to accept invite: " + (error.message || "Unknown error"));
+          alert(
+            "Failed to accept invite: " + (error.message || "Unknown error"),
+          );
           // Clear query param even on failure to prevent loops
-          window.history.replaceState({}, document.title, window.location.pathname);
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
         }
       }
     </script>

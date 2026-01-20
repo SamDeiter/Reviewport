@@ -478,6 +478,138 @@
           gap: 1.5rem;
         }
       }
+
+      /* Login Overlay */
+      .login-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--bg-dark);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .login-overlay.hidden {
+        display: none;
+      }
+
+      .login-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 3rem;
+        text-align: center;
+        max-width: 400px;
+      }
+
+      .login-card h2 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+      }
+
+      .login-card p {
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        font-size: 0.875rem;
+      }
+
+      .login-card .epic-notice {
+        background: rgba(88, 166, 255, 0.1);
+        border: 1px solid var(--accent-blue);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 1.5rem;
+        font-size: 0.75rem;
+        color: var(--accent-blue);
+      }
+
+      .google-signin-btn {
+        background: #fff;
+        color: #333;
+        border: none;
+        padding: 0.875rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0 auto;
+        transition: all 0.2s;
+      }
+
+      .google-signin-btn:hover {
+        background: #f1f1f1;
+        transform: translateY(-2px);
+      }
+
+      .google-signin-btn img {
+        width: 20px;
+        height: 20px;
+      }
+
+      .auth-error {
+        background: rgba(248, 81, 73, 0.1);
+        border: 1px solid var(--accent-red);
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: var(--accent-red);
+      }
+
+      .auth-error.hidden {
+        display: none;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .user-profile img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 2px solid var(--accent-blue);
+      }
+
+      .user-profile .user-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+
+      .logout-btn {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+      }
+
+      .logout-btn:hover {
+        border-color: var(--accent-red);
+        color: var(--accent-red);
+      }
+
+      .app-content {
+        display: none;
+      }
+
+      .app-content.visible {
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -493,14 +625,33 @@
           <div class="logo-subtitle">UE5 Educational Tools</div>
         </div>
       </div>
-      <div class="user-area">
-        <button class="login-btn" onclick="showLoginInfo()">
-          <i class="fab fa-google"></i>
-          Sign in with Google
-        </button>
+      <div class="user-area" id="user-area">
+        <!-- Will be populated by auth state -->
       </div>
     </header>
 
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="login-overlay">
+      <div class="login-card">
+        <div class="logo-icon" style="margin: 0 auto 1rem; width: 64px; height: 64px; font-size: 1.5rem;">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <h2>Welcome to Reviewport</h2>
+        <p>Sign in with your Epic Games Google account to access the UE5 Educational Tools Hub.</p>
+        <button class="google-signin-btn" id="google-signin-btn" onclick="signInWithGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          Sign in with Google
+        </button>
+        <div class="auth-error hidden" id="auth-error"></div>
+        <div class="epic-notice">
+          <i class="fas fa-shield-alt"></i>
+          Access restricted to @epicgames.com accounts
+        </div>
+      </div>
+    </div>
+
+    <!-- App Content (hidden until authenticated) -->
+    <div class="app-content" id="app-content">
     <main>
       <section class="hero">
         <h1>UE5 Educational Tools Hub</h1>
@@ -723,7 +874,7 @@
     </main>
 
     <footer>
-      <p>Reviewport v0.1.0 &bull; Built for Epic Games Learning Team</p>
+      <p>Reviewport v0.2.0 &bull; Built for Epic Games Learning Team</p>
       <p style="margin-top: 0.5rem">
         <a href="https://github.com/SamDeiter" target="_blank">GitHub</a> &bull;
         <a
@@ -736,6 +887,7 @@
         >
       </p>
     </footer>
+    </div><!-- End app-content -->
 
     <script>
       // Tool URLs configuration
@@ -850,17 +1002,28 @@
       firebaseScript.src =
         "https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js";
       firebaseScript.onload = () => {
-        const firestoreScript = document.createElement("script");
-        firestoreScript.src =
-          "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js";
-        firestoreScript.onload = initFirebase;
-        document.head.appendChild(firestoreScript);
+        const authScript = document.createElement("script");
+        authScript.src =
+          "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js";
+        authScript.onload = () => {
+          const firestoreScript = document.createElement("script");
+          firestoreScript.src =
+            "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js";
+          firestoreScript.onload = initFirebase;
+          document.head.appendChild(firestoreScript);
+        };
+        document.head.appendChild(authScript);
       };
       document.head.appendChild(firebaseScript);
 
+      // Allowed email domain
+      const ALLOWED_DOMAIN = "@epicgames.com";
+      
+      // Global Firebase references
+      let auth, db;
+
       async function initFirebase() {
         try {
-          // Same config as Question Generator
           // Firebase config for ue5-questions-prod
           // API key is restricted to *.samdeiter.github.io/* in Firebase Console
           const firebaseConfig = {
@@ -874,8 +1037,105 @@
           };
 
           firebase.initializeApp(firebaseConfig);
-          const db = firebase.firestore();
+          auth = firebase.auth();
+          db = firebase.firestore();
 
+          // Listen for auth state changes
+          auth.onAuthStateChanged(handleAuthStateChange);
+          
+          console.log("[Auth] Firebase initialized");
+        } catch (error) {
+          console.error("Firebase init error:", error);
+          showAuthError("Failed to initialize. Please refresh the page.");
+        }
+      }
+
+      function handleAuthStateChange(user) {
+        const loginOverlay = document.getElementById("login-overlay");
+        const appContent = document.getElementById("app-content");
+        const userArea = document.getElementById("user-area");
+        
+        if (user) {
+          // Check domain restriction
+          if (!user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase())) {
+            console.warn(`[Auth] Rejected: ${user.email} (not ${ALLOWED_DOMAIN})`);
+            showAuthError(`Access restricted to ${ALLOWED_DOMAIN} accounts only.`);
+            auth.signOut();
+            return;
+          }
+          
+          // User is authenticated with valid domain
+          console.log(`[Auth] Authenticated: ${user.email}`);
+          
+          // Hide login, show content
+          loginOverlay.classList.add("hidden");
+          appContent.classList.add("visible");
+          
+          // Update header with user info
+          userArea.innerHTML = `
+            <div class="user-profile">
+              <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="${user.displayName}">
+              <span class="user-name">${user.displayName || user.email}</span>
+              <button class="logout-btn" onclick="signOut()">Sign Out</button>
+            </div>
+          `;
+          
+          // Load data now that user is authenticated
+          loadQuestionStats();
+          
+        } else {
+          // User is not authenticated
+          console.log("[Auth] No user signed in");
+          
+          // Show login, hide content
+          loginOverlay.classList.remove("hidden");
+          appContent.classList.remove("visible");
+          
+          // Reset header
+          userArea.innerHTML = "";
+        }
+      }
+
+      async function signInWithGoogle() {
+        try {
+          hideAuthError();
+          const provider = new firebase.auth.GoogleAuthProvider();
+          // Hint to use Epic Games account
+          provider.setCustomParameters({
+            hd: 'epicgames.com'
+          });
+          await auth.signInWithPopup(provider);
+        } catch (error) {
+          console.error("[Auth] Sign-in error:", error);
+          if (error.code === 'auth/popup-closed-by-user') {
+            // User closed popup, don't show error
+            return;
+          }
+          showAuthError("Sign-in failed. Please try again.");
+        }
+      }
+
+      function signOut() {
+        auth.signOut().then(() => {
+          console.log("[Auth] Signed out");
+        }).catch((error) => {
+          console.error("[Auth] Sign-out error:", error);
+        });
+      }
+
+      function showAuthError(message) {
+        const errorEl = document.getElementById("auth-error");
+        errorEl.textContent = message;
+        errorEl.classList.remove("hidden");
+      }
+
+      function hideAuthError() {
+        const errorEl = document.getElementById("auth-error");
+        errorEl.classList.add("hidden");
+      }
+
+      async function loadQuestionStats() {
+        try {
           // Get question counts
           const snapshot = await db.collection("questions").get();
           const total = snapshot.size;
@@ -906,7 +1166,7 @@
           }
 
           console.log(
-            `Loaded ${total} questions (${verified} verified, ${pending} pending)`,
+            `[Data] Loaded ${total} questions (${verified} verified, ${pending} pending)`,
           );
         } catch (error) {
           console.error("Firebase error:", error);

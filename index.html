@@ -618,7 +618,7 @@
     <header>
       <div class="logo">
         <div class="logo-icon">
-          <i class="fas fa-rocket"></i>
+          <img src="logos/UE-Icon-2023-White.svg" alt="UE5" style="width: 32px; height: 32px;">
         </div>
         <div>
           <div class="logo-text">Reviewport</div>
@@ -633,8 +633,8 @@
     <!-- Login Overlay -->
     <div class="login-overlay" id="login-overlay">
       <div class="login-card">
-        <div class="logo-icon" style="margin: 0 auto 1rem; width: 64px; height: 64px; font-size: 1.5rem;">
-          <i class="fas fa-rocket"></i>
+        <div style="margin: 0 auto 1.5rem;">
+          <img src="logos/UE-Icon-2023-White.svg" alt="UE5" style="width: 80px; height: 80px;">
         </div>
         <h2>Welcome to Reviewport</h2>
         <p>Sign in with your Epic Games Google account to access the UE5 Educational Tools Hub.</p>
@@ -1074,7 +1074,7 @@
           // Update header with user info
           userArea.innerHTML = `
             <div class="user-profile">
-              <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="${user.displayName}">
+              <img src="${user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User')}" alt="${user.displayName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=667eea&color=fff'">
               <span class="user-name">${user.displayName || user.email}</span>
               <button class="logout-btn" onclick="signOut()">Sign Out</button>
             </div>

@@ -861,8 +861,10 @@
       async function initFirebase() {
         try {
           // Same config as Question Generator
+          // Firebase config - API key should be restricted in Firebase Console
+          // See: https://firebase.google.com/docs/projects/api-keys#apply-restrictions
           const firebaseConfig = {
-            apiKey: "AIzaSyBv7xXAjvFhVw4nluhmOl-S1kGnH7TqPXc",
+            apiKey: "YOUR_API_KEY", // Replace with restricted API key
             authDomain: "ue5questiongenerator.firebaseapp.com",
             projectId: "ue5questiongenerator",
             storageBucket: "ue5questiongenerator.firebasestorage.app",

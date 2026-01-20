@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scenario Review Tool</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e0e0e0; display: flex; height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar { width: 280px; background: #16213e; border-right: 1px solid #0f3460; overflow-y: auto; flex-shrink: 0; }
+    .sidebar h2 { padding: 16px; background: #0f3460; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+    .scenario-list { list-style: none; }
+    .category-group { border-bottom: 1px solid #0f3460; }
+    .category-header { padding: 10px 16px; background: #1f4068; cursor: pointer; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; }
+    .category-header:hover { background: #2a5082; }
+    .category-header .count { font-size: 11px; background: #0f3460; padding: 2px 8px; border-radius: 10px; }
+    .category-items { display: block; }
+    .category-items.collapsed { display: none; }
+    .scenario-item { padding: 10px 16px 10px 24px; border-bottom: 1px solid #0f3460; cursor: pointer; font-size: 12px; transition: background 0.2s; }
+    .scenario-item:hover { background: #1f4068; }
+    .scenario-item.active { background: #e94560; color: white; }
+    .scenario-item.reviewed { border-left: 3px solid #4ade80; }
+    .scenario-item.has-issues { border-left: 3px solid #f59e0b; }
+    
+    /* Main content */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .header { padding: 16px 24px; background: #0f3460; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 18px; }
+    .header-actions { display: flex; gap: 12px; }
+    .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn-primary { background: #e94560; color: white; }
+    .btn-secondary { background: #1f4068; color: #e0e0e0; }
+    .btn:hover { opacity: 0.9; }
+    
+    /* Step viewer */
+    .step-viewer { flex: 1; overflow-y: auto; padding: 24px; }
+    .step-card { background: #16213e; border-radius: 12px; margin-bottom: 24px; overflow: hidden; border: 1px solid #0f3460; }
+    .step-header { padding: 16px 20px; background: #0f3460; display: flex; justify-content: space-between; align-items: center; }
+    .step-title { font-weight: 600; }
+    .step-skill { font-size: 12px; padding: 4px 10px; background: #e94560; border-radius: 12px; }
+    .step-content { display: grid; grid-template-columns: 4fr 1fr; gap: 16px; padding: 16px; align-items: start; }
+    .step-text { font-size: 14px; line-height: 1.6; }
+    .step-text h4 { margin-bottom: 8px; color: #4ade80; }
+    .step-image { border-radius: 8px; overflow: hidden; background: #0a0a14; }
+    .step-image img { width: 100%; height: auto; display: block; }
+    .step-image.no-image { display: flex; align-items: center; justify-content: center; height: 120px; color: #666; }
+    
+    /* Choices */
+    .choices { margin-top: 16px; }
+    .choice { padding: 10px 14px; margin: 6px 0; border-radius: 6px; font-size: 13px; border-left: 3px solid; }
+    .choice.correct { background: #065f4620; border-color: #4ade80; }
+    .choice.partial { background: #f59e0b20; border-color: #f59e0b; }
+    .choice.wrong { background: #ef444420; border-color: #ef4444; }
+    .choice.misguided { background: #f9731620; border-color: #f97316; }
+    
+    /* Feedback panel */
+    .feedback-panel { padding: 16px 20px; background: #1f4068; border-top: 1px solid #0f3460; }
+    .feedback-row { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    .feedback-group { display: flex; align-items: center; gap: 8px; }
+    .feedback-group label { font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .feedback-group input[type="checkbox"] { width: 16px; height: 16px; }
+    .feedback-note { flex: 1; min-width: 200px; }
+    .feedback-note input { width: 100%; padding: 8px 12px; border: 1px solid #0f3460; border-radius: 6px; background: #16213e; color: #e0e0e0; font-size: 13px; }
+    
+    /* Empty state */
+    .empty-state { display: flex; align-items: center; justify-content: center; height: 100%; color: #666; font-size: 16px; }
+    
+    /* Stats bar */
+    .stats-bar { padding: 12px 24px; background: #0a0a14; display: flex; gap: 24px; font-size: 13px; }
+    .stat { display: flex; align-items: center; gap: 6px; }
+    .stat-value { font-weight: 600; color: #4ade80; }
+    
+    /* Scenario info bar */
+    .scenario-info { padding: 12px 24px; background: #1f4068; display: none; gap: 20px; font-size: 13px; border-bottom: 1px solid #0f3460; }
+    .scenario-info.visible { display: flex; }
+    .scenario-info .info-item { display: flex; align-items: center; gap: 6px; }
+    .scenario-info .info-label { color: #888; }
+    .scenario-info .info-value { font-weight: 600; color: #e0e0e0; }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Scenarios (<span id="scenario-count">0</span>)</h2>
+    <ul class="scenario-list" id="scenario-list"></ul>
+  </div>
+  
+  <div class="main">
+    <div class="header">
+      <h1 id="current-scenario">Select a Scenario</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="play-btn" onclick="playScenario()" disabled>▶ Play in Tracker</button>
+        <select id="export-category" class="btn btn-secondary" style="padding: 8px 12px;">
+          <option value="">-- Export Category --</option>
+          <option value="game_dev">🎮 Game Dev</option>
+          <option value="look_dev">🎨 Look Dev</option>
+          <option value="tech_art">⚙️ Tech Art</option>
+          <option value="vfx">✨ VFX</option>
+          <option value="worldbuilding">🌍 Worldbuilding</option>
+          <option value="all">📦 All Scenarios</option>
+        </select>
+        <button class="btn btn-primary" onclick="exportLMSPackage()">📤 Export LMS Package</button>
+        <button class="btn btn-secondary" onclick="exportFeedback()">💾 Export Feedback</button>
+      </div>
+    </div>
+    
+    <div class="stats-bar">
+      <div class="stat" title="Total scenarios loaded">📋 Scenarios: <span class="stat-value" id="stat-total">0</span></div>
+      <div class="stat" title="Scenarios you've reviewed">✅ Reviewed: <span class="stat-value" id="stat-reviewed">0</span></div>
+      <div class="stat" title="Steps flagged with issues">⚠️ Flagged Steps: <span class="stat-value" id="stat-issues">0</span></div>
+    </div>
+    
+    <div class="scenario-info" id="scenario-info">
+      <div class="info-item"><span class="info-label">Steps:</span> <span class="info-value" id="info-steps">0</span></div>
+      <div class="info-item"><span class="info-label">Category:</span> <span class="info-value" id="info-category">-</span></div>
+      <div class="info-item"><span class="info-label">Est. Time:</span> <span class="info-value" id="info-time">-</span></div>
+    </div>
+    
+    <div class="step-viewer" id="step-viewer">
+      <div class="empty-state">Select a scenario from the sidebar</div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    let scenarios = {};
+    let currentScenarioId = null;
+    let feedback = JSON.parse(localStorage.getItem('scenarioFeedback') || '{}');
+    
+    // Load scenarios
+    async function loadScenarios() {
+      // Get list of scenario folders with images
+      const imageDirs = await fetch('../../assets/generated/').catch(() => null);
+      
+      // Load actual scenario JS files
+      const scenarioFiles = [
+        'game_dev', 'look_dev', 'tech_art', 'vfx', 'worldbuilding'
+      ];
+      
+      // Since we can't do directory listing easily, we'll load from window.SCENARIOS
+      // which requires loading the scenario files first
+      
+      // For now, scan what we know exists
+      const knownScenarios = Object.keys(window.SCENARIOS || {});
+      
+      if (knownScenarios.length === 0) {
+        document.getElementById('step-viewer').innerHTML = `
+          <div class="empty-state">
+            <div style="text-align: center;">
+              <p>Loading scenarios...</p>
+              <p style="font-size: 13px; margin-top: 8px; color: #888;">
+                If this persists, run this tool from a local server.
+              </p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      scenarios = window.SCENARIOS;
+      renderScenarioList();
+      updateStats();
+    }
+    
+    // Category mappings
+    const CATEGORIES = {
+      'game_dev': { name: '🎮 Game Dev', color: '#4ade80' },
+      'look_dev': { name: '🎨 Look Dev', color: '#60a5fa' },
+      'tech_art': { name: '⚙️ Tech Art', color: '#f59e0b' },
+      'vfx': { name: '✨ VFX', color: '#a855f7' },
+      'worldbuilding': { name: '🌍 Worldbuilding', color: '#14b8a6' },
+      'other': { name: '📁 Other', color: '#6b7280' }
+    };
+    
+    function getCategory(id) {
+      const meta = scenarios[id]?.meta;
+      if (meta?.category) {
+        const cat = meta.category.toLowerCase().replace(/[\s&]+/g, '_');
+        if (cat.includes('game') || cat.includes('blueprint') || cat.includes('logic')) return 'game_dev';
+        if (cat.includes('look') || cat.includes('light') || cat.includes('material') || cat.includes('render')) return 'look_dev';
+        if (cat.includes('tech') || cat.includes('asset') || cat.includes('animation')) return 'tech_art';
+        if (cat.includes('vfx') || cat.includes('niagara') || cat.includes('sequencer') || cat.includes('cinematic')) return 'vfx';
+        if (cat.includes('world') || cat.includes('partition') || cat.includes('streaming')) return 'worldbuilding';
+      }
+      return 'other';
+    }
+    
+    function renderScenarioList() {
+      const list = document.getElementById('scenario-list');
+      const scenarioIds = Object.keys(scenarios).sort();
+      
+      document.getElementById('scenario-count').textContent = scenarioIds.length;
+      
+      // Group by category
+      const groups = {};
+      scenarioIds.forEach(id => {
+        const cat = getCategory(id);
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(id);
+      });
+      
+      // Render grouped list
+      list.innerHTML = Object.entries(CATEGORIES).map(([catKey, catInfo]) => {
+        const items = groups[catKey] || [];
+        if (items.length === 0) return '';
+        
+        return `
+          <div class="category-group">
+            <div class="category-header" onclick="toggleCategory('${catKey}')">
+              <span>${catInfo.name}</span>
+              <span class="count">${items.length}</span>
+            </div>
+            <div class="category-items" id="cat-${catKey}">
+              ${items.map(id => {
+                const fb = feedback[id] || {};
+                const hasIssues = Object.values(fb).some(s => s.textIssue || s.imageIssue);
+                const reviewed = Object.keys(fb).length > 0;
+                return `
+                  <li class="scenario-item ${currentScenarioId === id ? 'active' : ''} ${reviewed ? 'reviewed' : ''} ${hasIssues ? 'has-issues' : ''}"
+                      onclick="selectScenario('${id}')">
+                    ${scenarios[id]?.meta?.title || id}
+                  </li>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function toggleCategory(catKey) {
+      const el = document.getElementById('cat-' + catKey);
+      if (el) el.classList.toggle('collapsed');
+    }
+    
+    function selectScenario(id) {
+      currentScenarioId = id;
+      renderScenarioList();
+      renderScenario(id);
+    }
+    
+    function renderScenario(id) {
+      const scenario = scenarios[id];
+      if (!scenario) return;
+      
+      document.getElementById('current-scenario').textContent = scenario.meta?.title || id;
+      
+      // Update info bar
+      const stepKeys = Object.keys(scenario.steps || {});
+      const stepCount = stepKeys.filter(s => s !== 'conclusion').length;
+      document.getElementById('info-steps').textContent = stepCount;
+      document.getElementById('info-category').textContent = scenario.meta?.category || 'Unknown';
+      document.getElementById('info-time').textContent = scenario.meta?.estimateHours ? `${scenario.meta.estimateHours}h` : '-';
+      document.getElementById('scenario-info').classList.add('visible');
+      document.getElementById('play-btn').disabled = false;
+      
+      const viewer = document.getElementById('step-viewer');
+      const stepsObj = scenario.steps || {};
+      
+      viewer.innerHTML = Object.entries(stepsObj).map(([stepId, step]) => {
+        const imagePath = `https://samdeiter.github.io/UE5ScenarioTracker/assets/generated/${id}/${stepId}.jpg`;
+        const pngPath = `https://samdeiter.github.io/UE5ScenarioTracker/assets/generated/${id}/${stepId}.png`;
+        const fb = feedback[id]?.[stepId] || {};
+        
+        const choicesHtml = (step.choices || []).map(c => `
+          <div class="choice ${c.type}">
+            <strong>${c.type.toUpperCase()}:</strong> ${c.text}
+          </div>
+        `).join('');
+        
+        return `
+          <div class="step-card" data-step="${stepId}">
+            <div class="step-header">
+              <span class="step-title">${stepId}: ${step.title || 'Untitled'}</span>
+              <span class="step-skill">${step.skill || 'general'}</span>
+            </div>
+            <div class="step-content">
+              <div class="step-text">
+                <h4>Prompt</h4>
+                <div>${step.prompt || 'No prompt'}</div>
+                <div class="choices">${choicesHtml}</div>
+              </div>
+              <div class="step-image">
+                <img src="${imagePath}" 
+                     onerror="this.src='${pngPath}'; this.onerror=() => this.parentElement.innerHTML='<div class=\\'no-image\\'>No image</div>'"
+                     alt="${stepId}">
+              </div>
+            </div>
+            <div class="feedback-panel">
+              <div class="feedback-row">
+                <div class="feedback-group">
+                  <label>
+                    <input type="checkbox" ${fb.textIssue ? 'checked' : ''} 
+                           onchange="updateFeedback('${id}', '${stepId}', 'textIssue', this.checked)">
+                    ❌ Text needs edit
+                  </label>
+                </div>
+                <div class="feedback-group">
+                  <label>
+                    <input type="checkbox" ${fb.imageIssue ? 'checked' : ''} 
+                           onchange="updateFeedback('${id}', '${stepId}', 'imageIssue', this.checked)">
+                    ❌ Image needs remake
+                  </label>
+                </div>
+                <div class="feedback-note">
+                  <input type="text" placeholder="Notes..." value="${fb.note || ''}"
+                         onchange="updateFeedback('${id}', '${stepId}', 'note', this.value)">
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function updateFeedback(scenarioId, stepId, field, value) {
+      if (!feedback[scenarioId]) feedback[scenarioId] = {};
+      if (!feedback[scenarioId][stepId]) feedback[scenarioId][stepId] = {};
+      
+      feedback[scenarioId][stepId][field] = value;
+      
+      // Cleanup empty entries
+      if (!feedback[scenarioId][stepId].textIssue && 
+          !feedback[scenarioId][stepId].imageIssue && 
+          !feedback[scenarioId][stepId].note) {
+        delete feedback[scenarioId][stepId];
+      }
+      if (Object.keys(feedback[scenarioId]).length === 0) {
+        delete feedback[scenarioId];
+      }
+      
+      localStorage.setItem('scenarioFeedback', JSON.stringify(feedback));
+      renderScenarioList();
+      updateStats();
+    }
+    
+    function updateStats() {
+      const total = Object.keys(scenarios).length;
+      const reviewed = Object.keys(feedback).length;
+      let issues = 0;
+      
+      Object.values(feedback).forEach(scenarioFb => {
+        Object.values(scenarioFb).forEach(stepFb => {
+          if (stepFb.textIssue || stepFb.imageIssue) issues++;
+        });
+      });
+      
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-reviewed').textContent = reviewed;
+      document.getElementById('stat-issues').textContent = issues;
+    }
+    
+    function playScenario() {
+      if (!currentScenarioId) return;
+      // Open the main app with the scenario pre-selected
+      window.open(`../../index.html?scenario=${currentScenarioId}`, '_blank');
+    }
+    
+    function exportLMSPackage() {
+      const category = document.getElementById('export-category').value;
+      if (!category) {
+        alert('Please select a category to export');
+        return;
+      }
+      
+      // Get scenarios for selected category
+      const scenarioIds = Object.keys(scenarios).filter(id => {
+        if (category === 'all') return true;
+        return getCategory(id) === category;
+      });
+      
+      if (scenarioIds.length === 0) {
+        alert('No scenarios found for this category');
+        return;
+      }
+      
+      // Create export manifest
+      const manifest = {
+        exportDate: new Date().toISOString(),
+        category: category,
+        scenarioCount: scenarioIds.length,
+        scenarios: scenarioIds.map(id => ({
+          id: id,
+          title: scenarios[id]?.meta?.title || id,
+          category: scenarios[id]?.meta?.category || 'Unknown',
+          stepCount: Object.keys(scenarios[id]?.steps || {}).filter(s => s !== 'conclusion').length
+        }))
+      };
+      
+      // Download manifest
+      const blob = new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `lms_export_${category}_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert(`Exported ${scenarioIds.length} scenarios to LMS manifest.\n\nRun: python build-lms.py --manifest lms_export_${category}_${Date.now()}.json`);
+    }
+    
+    function exportFeedback() {
+      const blob = new Blob([JSON.stringify(feedback, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'scenario_feedback.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadScenarios);
+  </script>
+  
+  <!-- Load scenario files -->
+  <script src="../../js/config.js"></script>
+  <script src="../../scenarios/00_manifest.js"></script>
+  <script src="scenario-loader.js"></script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reviewport - UE5 Educational Tools Hub</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-dark: #0d1117;
+        --bg-card: #161b22;
+        --bg-card-hover: #21262d;
+        --border: #30363d;
+        --text-primary: #e6edf3;
+        --text-secondary: #8b949e;
+        --accent-blue: #58a6ff;
+        --accent-purple: #8b5cf6;
+        --accent-green: #3fb950;
+        --accent-orange: #f0883e;
+        --accent-red: #f85149;
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-card: linear-gradient(145deg, #1a1f29 0%, #0d1117 100%);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated background */
+      .bg-gradient {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          radial-gradient(
+            ellipse at 20% 20%,
+            rgba(88, 166, 255, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 80% 80%,
+            rgba(139, 92, 246, 0.1) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            ellipse at 50% 50%,
+            rgba(63, 185, 80, 0.05) 0%,
+            transparent 50%
+          );
+        z-index: -1;
+        animation: pulse 15s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      /* Header */
+      header {
+        padding: 2rem 4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .logo-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--gradient-primary);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .logo-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .logo-subtitle {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .user-area {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .login-btn {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .login-btn:hover {
+        background: var(--bg-card-hover);
+        border-color: var(--accent-blue);
+      }
+
+      /* Main content */
+      main {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+      }
+
+      .hero {
+        text-align: center;
+        margin-bottom: 4rem;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #fff 0%, #8b949e 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .hero p {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Stats bar */
+      .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin: 2rem 0 4rem;
+        flex-wrap: wrap;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent-blue);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+      }
+
+      /* Tools grid */
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .section-title i {
+        color: var(--accent-purple);
+      }
+
+      .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+      }
+
+      .tool-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tool-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--card-accent, var(--accent-blue));
+      }
+
+      .tool-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--card-accent, var(--accent-blue));
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      }
+
+      .tool-card.blueprint {
+        --card-accent: var(--accent-blue);
+      }
+      .tool-card.scenario {
+        --card-accent: var(--accent-purple);
+      }
+      .tool-card.question {
+        --card-accent: var(--accent-green);
+      }
+      .tool-card.material {
+        --card-accent: var(--accent-orange);
+      }
+
+      .tool-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .tool-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--bg-dark);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .tool-card.blueprint .tool-icon {
+        color: var(--accent-blue);
+      }
+      .tool-card.scenario .tool-icon {
+        color: var(--accent-purple);
+      }
+      .tool-card.question .tool-icon {
+        color: var(--accent-green);
+      }
+      .tool-card.material .tool-icon {
+        color: var(--accent-orange);
+      }
+
+      .tool-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        background: rgba(63, 185, 80, 0.1);
+        color: var(--accent-green);
+      }
+
+      .tool-status.offline {
+        background: rgba(248, 81, 73, 0.1);
+        color: var(--accent-red);
+      }
+
+      .tool-status .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: blink 2s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .tool-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .tool-description {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+
+      .tool-stats {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border);
+        padding-top: 1rem;
+        margin-top: 1rem;
+      }
+
+      .tool-stats span {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .tool-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-primary {
+        background: var(--accent-blue);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: #79b8ff;
+      }
+
+      .btn-secondary {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        border: 1px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        border-color: var(--accent-blue);
+      }
+
+      /* Quick actions */
+      .quick-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .quick-action {
+        flex: 1;
+        min-width: 200px;
+        padding: 1rem;
+        background: var(--bg-dark);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .quick-action:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-2px);
+      }
+
+      .quick-action i {
+        font-size: 1.5rem;
+        color: var(--accent-blue);
+        margin-bottom: 0.5rem;
+      }
+
+      .quick-action h4 {
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .quick-action p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        border-top: 1px solid var(--border);
+        margin-top: 4rem;
+      }
+
+      footer a {
+        color: var(--accent-blue);
+        text-decoration: none;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        header {
+          padding: 1rem;
+          flex-direction: column;
+          gap: 1rem;
+        }
+
+        .hero h1 {
+          font-size: 2rem;
+        }
+
+        .stats-bar {
+          gap: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-gradient"></div>
+
+    <header>
+      <div class="logo">
+        <div class="logo-icon">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <div>
+          <div class="logo-text">Reviewport</div>
+          <div class="logo-subtitle">UE5 Educational Tools</div>
+        </div>
+      </div>
+      <div class="user-area">
+        <button class="login-btn" onclick="showLoginInfo()">
+          <i class="fab fa-google"></i>
+          Sign in with Google
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>UE5 Educational Tools Hub</h1>
+        <p>
+          Review, track, and manage all your Unreal Engine 5 educational content
+          from one central location.
+        </p>
+      </section>
+
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-value" id="scenario-count">21</div>
+          <div class="stat-label">Scenarios</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="question-count">0</div>
+          <div class="stat-label">Questions</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="review-count">0</div>
+          <div class="stat-label">Reviews Pending</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Active Tools</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">
+        <i class="fas fa-tools"></i>
+        Educational Tools
+      </h2>
+
+      <div class="tools-grid">
+        <!-- Blueprint Editor -->
+        <div class="tool-card blueprint" onclick="launchTool('blueprint')">
+          <div class="tool-header">
+            <div class="tool-icon">
+              <i class="fas fa-project-diagram"></i>
+            </div>
+            <div class="tool-status" id="blueprint-status">
+              <span class="dot"></span>
+              Online
+            </div>
+          </div>
+          <h3 class="tool-title">Blueprint Editor</h3>
+          <p class="tool-description">
+            Interactive visual scripting environment that replicates UE5's
+            Blueprint system. Perfect for teaching BP fundamentals.
+          </p>
+          <div class="tool-stats">
+            <span><i class="fas fa-cube"></i> 27 Tasks</span>
+            <span><i class="fas fa-bug"></i> 5 BP Scenarios</span>
+          </div>
+          <div class="tool-actions">
+            <button
+              class="btn btn-primary"
+              onclick="
+                event.stopPropagation();
+                launchTool('blueprint');
+              "
+            >
+              <i class="fas fa-play"></i> Launch
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="
+                event.stopPropagation();
+                launchTool('blueprint-review');
+              "
+            >
+              <i class="fas fa-search"></i> Review Mode
+            </button>
+          </div>
+        </div>
+
+        <!-- Scenario Tracker -->
+        <div class="tool-card scenario" onclick="launchTool('scenario')">
+          <div class="tool-header">
+            <div class="tool-icon">
+              <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <div class="tool-status" id="scenario-status">
+              <span class="dot"></span>
+              Online
+            </div>
+          </div>
+          <h3 class="tool-title">Scenario Tracker</h3>
+          <p class="tool-description">
+            Comprehensive library of real-world UE5 troubleshooting scenarios
+            across 5 disciplines. Track progress and validate learning.
+          </p>
+          <div class="tool-stats">
+            <span><i class="fas fa-folder"></i> 5 Disciplines</span>
+            <span><i class="fas fa-file-alt"></i> 45 Scenarios</span>
+            <span><i class="fas fa-check-circle"></i> 0 Reviewed</span>
+          </div>
+          <div class="tool-actions">
+            <button
+              class="btn btn-primary"
+              onclick="
+                event.stopPropagation();
+                launchTool('scenario');
+              "
+            >
+              <i class="fas fa-play"></i> Launch
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="
+                event.stopPropagation();
+                launchTool('scenario-review');
+              "
+            >
+              <i class="fas fa-search"></i> Review Mode
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Generator -->
+        <div class="tool-card question" onclick="launchTool('question')">
+          <div class="tool-header">
+            <div class="tool-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <div class="tool-status offline" id="question-status">
+              <span class="dot"></span>
+              Offline
+            </div>
+          </div>
+          <h3 class="tool-title">Question Generator</h3>
+          <p class="tool-description">
+            AI-powered quiz generation tool that creates multiple-choice
+            questions from UE5 documentation with source verification.
+          </p>
+          <div class="tool-stats">
+            <span
+              ><i class="fas fa-list"></i>
+              <span id="question-card-count">...</span> Questions</span
+            >
+            <span
+              ><i class="fas fa-check-circle"></i>
+              <span id="verified-count">...</span> Verified</span
+            >
+            <span
+              ><i class="fas fa-clock"></i>
+              <span id="pending-count">...</span> Pending</span
+            >
+          </div>
+          <div class="tool-actions">
+            <button
+              class="btn btn-primary"
+              onclick="
+                event.stopPropagation();
+                launchTool('question');
+              "
+            >
+              <i class="fas fa-play"></i> Launch
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="
+                event.stopPropagation();
+                launchTool('question-review');
+              "
+            >
+              <i class="fas fa-search"></i> Review Mode
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <h2 class="section-title">
+        <i class="fas fa-bolt"></i>
+        Quick Actions
+      </h2>
+
+      <div class="quick-actions">
+        <a
+          class="quick-action"
+          href="https://samdeiter.github.io/UE5LMSBlueprint/?mode=review"
+          target="_blank"
+        >
+          <i class="fas fa-clipboard-check"></i>
+          <h4>Review Blueprint Scenarios</h4>
+          <p>Open Blueprint Editor in Review Mode</p>
+        </a>
+        <a
+          class="quick-action"
+          href="./tools/scenario-review/index.html"
+          target="_blank"
+        >
+          <i class="fas fa-edit"></i>
+          <h4>Review Text Scenarios</h4>
+          <p>Open Scenario Tracker for text reviews</p>
+        </a>
+        <a
+          class="quick-action"
+          href="#"
+          onclick="
+            exportReport();
+            return false;
+          "
+        >
+          <i class="fas fa-file-export"></i>
+          <h4>Export Review Report</h4>
+          <p>Generate a summary of all reviews</p>
+        </a>
+        <a
+          class="quick-action"
+          href="https://drive.google.com/drive/folders/1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH"
+          target="_blank"
+        >
+          <i class="fab fa-google-drive"></i>
+          <h4>Open Drive Folder</h4>
+          <p>View screenshots and review data</p>
+        </a>
+      </div>
+    </main>
+
+    <footer>
+      <p>Reviewport v0.1.0 &bull; Built for Epic Games Learning Team</p>
+      <p style="margin-top: 0.5rem">
+        <a href="https://github.com/SamDeiter" target="_blank">GitHub</a> &bull;
+        <a
+          href="#"
+          onclick="
+            showDocs();
+            return false;
+          "
+          >Documentation</a
+        >
+      </p>
+    </footer>
+
+    <script>
+      // Tool URLs configuration
+      const TOOLS = {
+        blueprint: "https://samdeiter.github.io/UE5LMSBlueprint/",
+        "blueprint-review":
+          "https://samdeiter.github.io/UE5LMSBlueprint/?mode=review",
+        scenario: "https://samdeiter.github.io/UE5ScenarioTracker/",
+        "scenario-review": "./tools/scenario-review/index.html",
+        question: "https://samdeiter.github.io/UE5QuestionGenerator/",
+        "question-review":
+          "https://samdeiter.github.io/UE5QuestionGenerator/?mode=review",
+      };
+
+      // Google Drive configuration for screenshot storage
+      const DRIVE_CONFIG = {
+        folderId: "1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH",
+        folderUrl:
+          "https://drive.google.com/drive/folders/1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH",
+      };
+
+      function launchTool(toolId) {
+        const url = TOOLS[toolId];
+        if (url) {
+          window.open(url, "_blank");
+        }
+      }
+
+      function showLoginInfo() {
+        alert(
+          "Google Authentication will be configured with Firebase Auth.\n\nFor Epic Games employees, access will be restricted to @epicgames.com domain.",
+        );
+      }
+
+      function exportReport() {
+        const report = {
+          timestamp: new Date().toISOString(),
+          stats: {
+            scenarios: document.getElementById("scenario-count").textContent,
+            questions: document.getElementById("question-count").textContent,
+            pending: document.getElementById("review-count").textContent,
+          },
+          tools: Object.keys(TOOLS),
+        };
+
+        const blob = new Blob([JSON.stringify(report, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `review-report-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function syncData() {
+        if (confirm("Open Google Drive folder to verify synced data?")) {
+          window.open(DRIVE_CONFIG.folderUrl, "_blank");
+        }
+      }
+
+      function showDocs() {
+        window.open("https://github.com/SamDeiter/Reviewport/wiki", "_blank");
+      }
+
+      // Check tool status on load
+      async function checkToolStatus() {
+        const statusChecks = [
+          { id: "blueprint-status", url: "http://localhost:8000/" },
+          { id: "scenario-status", url: "http://localhost:8080/" },
+        ];
+
+        for (const check of statusChecks) {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+            await fetch(check.url, {
+              method: "HEAD",
+              mode: "no-cors",
+              signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+            // If we get here, the server responded
+            const el = document.getElementById(check.id);
+            if (el) {
+              el.classList.remove("offline");
+              el.innerHTML = '<span class="dot"></span> Online';
+            }
+          } catch {
+            const el = document.getElementById(check.id);
+            if (el) {
+              el.classList.add("offline");
+              el.innerHTML = '<span class="dot"></span> Offline';
+            }
+          }
+        }
+      }
+
+      // Run status check on load
+      checkToolStatus();
+      // Refresh every 30 seconds
+      setInterval(checkToolStatus, 30000);
+
+      // Firebase configuration for Question Generator
+      // Load Firebase SDK
+      const firebaseScript = document.createElement("script");
+      firebaseScript.src =
+        "https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js";
+      firebaseScript.onload = () => {
+        const firestoreScript = document.createElement("script");
+        firestoreScript.src =
+          "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js";
+        firestoreScript.onload = initFirebase;
+        document.head.appendChild(firestoreScript);
+      };
+      document.head.appendChild(firebaseScript);
+
+      async function initFirebase() {
+        try {
+          // Same config as Question Generator
+          const firebaseConfig = {
+            apiKey: "AIzaSyBv7xXAjvFhVw4nluhmOl-S1kGnH7TqPXc",
+            authDomain: "ue5questiongenerator.firebaseapp.com",
+            projectId: "ue5questiongenerator",
+            storageBucket: "ue5questiongenerator.firebasestorage.app",
+            messagingSenderId: "295819632007",
+            appId: "1:295819632007:web:7f8cdbd61f5d79ceb28f3d",
+          };
+
+          firebase.initializeApp(firebaseConfig);
+          const db = firebase.firestore();
+
+          // Get question counts
+          const snapshot = await db.collection("questions").get();
+          const total = snapshot.size;
+
+          let verified = 0;
+          let pending = 0;
+          snapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.humanVerified) {
+              verified++;
+            } else {
+              pending++;
+            }
+          });
+
+          // Update UI
+          document.getElementById("question-count").textContent = total;
+          document.getElementById("question-card-count").textContent = total;
+          document.getElementById("verified-count").textContent = verified;
+          document.getElementById("pending-count").textContent = pending;
+          document.getElementById("review-count").textContent = pending;
+
+          // Update status to online
+          const statusEl = document.getElementById("question-status");
+          if (statusEl) {
+            statusEl.classList.remove("offline");
+            statusEl.innerHTML = '<span class="dot"></span> Online';
+          }
+
+          console.log(
+            `Loaded ${total} questions (${verified} verified, ${pending} pending)`,
+          );
+        } catch (error) {
+          console.error("Firebase error:", error);
+          document.getElementById("question-card-count").textContent = "?";
+          document.getElementById("verified-count").textContent = "?";
+          document.getElementById("pending-count").textContent = "?";
+        }
+      }
+    </script>
+  </body>
+</html>

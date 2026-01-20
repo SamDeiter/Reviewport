@@ -603,12 +603,112 @@
         color: var(--accent-red);
       }
 
-      .app-content {
+      .app-content.visible {
+        display: block;
+      }
+
+      /* Admin Panel Styles */
+      .admin-section {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px dashed var(--border);
+        display: none; /* Hidden by default */
+      }
+
+      .admin-section.visible {
+        display: block;
+      }
+
+      .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-top: 1.5rem;
+      }
+
+      .admin-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 2rem;
+      }
+
+      .admin-card h3 {
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--accent-blue);
+      }
+
+      .tool-selector {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: var(--bg-dark);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+
+      .tool-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+
+      .tool-checkbox:hover {
+        background: var(--bg-card-hover);
+      }
+
+      .tool-checkbox input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent-blue);
+      }
+
+      .invite-link-area {
+        margin-top: 1.5rem;
         display: none;
       }
 
-      .app-content.visible {
+      .invite-link-area.visible {
         display: block;
+      }
+
+      .copy-area {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+
+      .copy-input {
+        flex: 1;
+        background: var(--bg-dark);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.875rem;
+      }
+
+      .admin-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .system-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem;
       }
     </style>
   </head>
@@ -824,6 +924,86 @@
         </div>
       </div>
 
+      <!-- Unified Access Management (Admins Only) -->
+      <section class="admin-section" id="admin-panel">
+        <h2 class="section-title">
+          <i class="fas fa-user-shield"></i>
+          Unified Access Management
+        </h2>
+        
+        <div class="admin-grid">
+          <!-- Invite Generator -->
+          <div class="admin-card">
+            <h3><i class="fas fa-plus-circle"></i> Create Reviewer Invite</h3>
+            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Select the tools this reviewer should have access to. Each link is single-use.
+            </p>
+            
+            <div class="tool-selector">
+              <label class="tool-checkbox">
+                <input type="checkbox" name="tool" value="questions" checked>
+                <div>
+                  <div style="font-weight: 500;">Question Generator</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">AI-powered MCQ generation & verification</div>
+                </div>
+              </label>
+              <label class="tool-checkbox">
+                <input type="checkbox" name="tool" value="blueprint">
+                <div>
+                  <div style="font-weight: 500;">Blueprint Editor</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">Visual scripting review scenarios</div>
+                </div>
+              </label>
+              <label class="tool-checkbox">
+                <input type="checkbox" name="tool" value="scenario">
+                <div>
+                  <div style="font-weight: 500;">Scenario Tracker</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">Text-based troubleshooting reviews</div>
+                </div>
+              </label>
+               <label class="tool-checkbox">
+                <input type="checkbox" name="tool" value="materials">
+                <div>
+                  <div style="font-weight: 500;">Materials Hub</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">Shader & material logic evaluation</div>
+                </div>
+              </label>
+            </div>
+            
+            <button class="btn btn-primary system-btn" onclick="generateInviteLink()">
+              <i class="fas fa-link"></i> Generate Invite Link
+            </button>
+
+            <div class="invite-link-area" id="invite-link-area">
+              <div style="font-size: 0.75rem; color: var(--accent-green); margin-top: 1rem;">Invite Code Generated:</div>
+              <div class="copy-area">
+                <input type="text" class="copy-input" id="invite-url" readonly>
+                <button class="btn btn-secondary" onclick="copyInviteUrl()">
+                  <i class="fas fa-copy"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Migration Tools -->
+          <div class="admin-card">
+            <h3><i class="fas fa-database"></i> System Tools</h3>
+            <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+              Critical system maintenance and initialization tools.
+            </p>
+            <div class="admin-actions">
+              <button class="btn btn-secondary system-btn" onclick="runAccessMigration()">
+                <i class="fas fa-sync-alt"></i> Run Access Migration (Legacy Users)
+              </button>
+              <button class="btn btn-secondary system-btn" onclick="seedToolRegistry()">
+                <i class="fas fa-seedling"></i> Seed Tool Registry
+              </button>
+              <div id="system-status" style="font-size: 0.75rem; margin-top: 1rem; text-align: center;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Quick Actions -->
       <h2 class="section-title">
         <i class="fas fa-bolt"></i>
@@ -909,10 +1089,32 @@
           "https://drive.google.com/drive/folders/1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH",
       };
 
-      function launchTool(toolId) {
+      async function launchTool(toolId) {
         const url = TOOLS[toolId];
-        if (url) {
+        if (!url) return;
+
+        // 1. Epic Games employees have auto-access to everything
+        if (auth.currentUser && auth.currentUser.email.toLowerCase().endsWith("@epicgames.com")) {
           window.open(url, "_blank");
+          return;
+        }
+
+        // 2. Check per-tool access for external users
+        try {
+          // Normalize toolId (e.g., 'blueprint-review' -> 'blueprint')
+          const baseToolId = toolId.split('-')[0];
+          
+          const checkAccessFn = functions.httpsCallable("checkToolAccess");
+          const result = await checkAccessFn({ toolId: baseToolId });
+          
+          if (result.data.hasAccess) {
+            window.open(url, "_blank");
+          } else {
+            alert(`Access Denied: You do not have permission to access the ${baseToolId} tool. Please request an invite link for this tool.`);
+          }
+        } catch (error) {
+          console.error("[Access] Check failed:", error);
+          alert("Failed to verify access. Please try again later.");
         }
       }
 
@@ -991,7 +1193,13 @@
           const firestoreScript = document.createElement("script");
           firestoreScript.src =
             "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js";
-          firestoreScript.onload = initFirebase;
+          firestoreScript.onload = () => {
+            const functionsScript = document.createElement("script");
+            functionsScript.src =
+              "https://www.gstatic.com/firebasejs/10.7.0/firebase-functions-compat.js";
+            functionsScript.onload = initFirebase;
+            document.head.appendChild(functionsScript);
+          };
           document.head.appendChild(firestoreScript);
         };
         document.head.appendChild(authScript);
@@ -1021,6 +1229,7 @@
           firebase.initializeApp(firebaseConfig);
           auth = firebase.auth();
           db = firebase.firestore();
+          functions = firebase.functions();
 
           // Listen for auth state changes
           auth.onAuthStateChanged(handleAuthStateChange);
@@ -1039,9 +1248,12 @@
         
         if (user) {
           // Check domain restriction
-          if (!user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase())) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const hasInvite = urlParams.has('invite');
+          
+          if (!hasInvite && !user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase())) {
             console.warn(`[Auth] Rejected: ${user.email} (not ${ALLOWED_DOMAIN})`);
-            showAuthError(`Access restricted to ${ALLOWED_DOMAIN} accounts only.`);
+            showAuthError(`Access restricted to ${ALLOWED_DOMAIN} accounts only. If you have an invite, please use the invite link.`);
             auth.signOut();
             return;
           }
@@ -1064,10 +1276,18 @@
           
           // Load data now that user is authenticated
           loadQuestionStats();
+          checkAdminAccess();
+          checkInviteCode();
           
         } else {
           // User is not authenticated
           console.log("[Auth] No user signed in");
+          
+          // Check for invite in URL even if not signed in (to show login prompt)
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.has('invite')) {
+            showAuthError("You have an invite link! Please sign in with your Google account to accept it.");
+          }
           
           // Show login, hide content
           loginOverlay.classList.remove("hidden");
@@ -1082,10 +1302,21 @@
         try {
           hideAuthError();
           const provider = new firebase.auth.GoogleAuthProvider();
-          // Hint to use Epic Games account
-          provider.setCustomParameters({
-            hd: 'epicgames.com'
-          });
+          
+          // Only hint/force epicgames.com if NO invite is present.
+          // Holders of specific tool invites can use personal accounts.
+          const urlParams = new URLSearchParams(window.location.search);
+          if (!urlParams.has('invite')) {
+            provider.setCustomParameters({
+              hd: 'epicgames.com',
+              prompt: 'select_account'
+            });
+          } else {
+            provider.setCustomParameters({
+              prompt: 'select_account'
+            });
+          }
+          
           await auth.signInWithPopup(provider);
         } catch (error) {
           console.error("[Auth] Sign-in error:", error);
@@ -1155,6 +1386,163 @@
           document.getElementById("question-card-count").textContent = "?";
           document.getElementById("verified-count").textContent = "?";
           document.getElementById("pending-count").textContent = "?";
+        }
+      }
+
+      // --- Admin Functions ---
+
+      async function checkAdminAccess() {
+        try {
+          if (!auth.currentUser) return;
+          
+          // Epic Games employees are auto-admins (frontend check for immediate UI)
+          if (auth.currentUser.email.toLowerCase().endsWith("@epicgames.com")) {
+            console.log("[Admin] Auto-access granted (Epic Employee)");
+            document.getElementById("admin-panel").classList.add("visible");
+            return;
+          }
+
+          const checkFn = functions.httpsCallable("checkUserRegistration");
+          const result = await checkFn({});
+          const userData = result.data;
+          
+          console.log("[Admin] Registration check result:", userData);
+          
+          if (userData && userData.role === "admin") {
+            console.log("[Admin] Access detected via registry");
+            document.getElementById("admin-panel").classList.add("visible");
+          } else {
+            console.log("[Admin] No admin role detected");
+          }
+        } catch (error) {
+          console.error("[Admin] Access check failed:", error);
+        }
+      }
+
+      async function generateInviteLink() {
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        
+        try {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+          
+          const selectedTools = Array.from(document.querySelectorAll('input[name="tool"]:checked'))
+            .map(cb => cb.value);
+            
+          if (selectedTools.length === 0) {
+            alert("Please select at least one tool.");
+            return;
+          }
+
+          const createFn = functions.httpsCallable("createInvite");
+          const result = await createFn({
+            tools: selectedTools,
+            expiresInDays: 7
+          });
+
+          if (result.data.success) {
+            const inviteUrlArea = document.getElementById("invite-link-area");
+            const inviteUrlInput = document.getElementById("invite-url");
+            
+            // Construct the tool-specific landing URL
+            // For now, we point them to Reviewport which will handle the invite consume flow
+            const baseUrl = window.location.origin + window.location.pathname;
+            const inviteUrl = `${baseUrl}?invite=${result.data.code}`;
+            
+            inviteUrlInput.value = inviteUrl;
+            inviteUrlArea.classList.add("visible");
+          }
+        } catch (error) {
+          console.error("Invite generation error:", error);
+          alert("Failed to generate invite: " + error.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      }
+
+      function copyInviteUrl() {
+        const input = document.getElementById("invite-url");
+        input.select();
+        document.execCommand("copy");
+        
+        const btn = event.currentTarget;
+        const originalIcon = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.style.color = "var(--accent-green)";
+        
+        setTimeout(() => {
+          btn.innerHTML = originalIcon;
+          btn.style.color = "";
+        }, 2000);
+      }
+
+      async function runAccessMigration() {
+        if (!confirm("This will add 'questions' tool access to all existing users. Proceed?")) return;
+        
+        const statusEl = document.getElementById("system-status");
+        try {
+          statusEl.textContent = "Running migration...";
+          statusEl.style.color = "var(--accent-blue)";
+          
+          const migrateFn = functions.httpsCallable("runUnifiedAccessMigration");
+          const result = await migrateFn({});
+          
+          statusEl.textContent = `Migration complete: ${result.data.message}`;
+          statusEl.style.color = "var(--accent-green)";
+        } catch (error) {
+          console.error("Migration error:", error);
+          statusEl.textContent = "Migration failed: " + error.message;
+          statusEl.style.color = "var(--accent-red)";
+        }
+      }
+
+      async function seedToolRegistry() {
+        const statusEl = document.getElementById("system-status");
+        try {
+          statusEl.textContent = "Seeding registry...";
+          statusEl.style.color = "var(--accent-blue)";
+          
+          const seedFn = functions.httpsCallable("seedToolRegistry");
+          const result = await seedFn({});
+          
+          statusEl.textContent = `Registry seeded: ${result.data.message}`;
+          statusEl.style.color = "var(--accent-green)";
+        } catch (error) {
+          console.error("Seeding error:", error);
+          statusEl.textContent = "Seeding failed: " + error.message;
+          statusEl.style.color = "var(--accent-red)";
+        }
+      }
+
+      async function checkInviteCode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const inviteCode = urlParams.get('invite');
+        
+        if (!inviteCode || !auth.currentUser) return;
+        
+        try {
+          console.log(`[Invite] Attempting to consume code: ${inviteCode}`);
+          const consumeFn = functions.httpsCallable("consumeInvite");
+          const result = await consumeFn({ code: inviteCode });
+          
+          if (result.data && result.data.success) {
+            const tools = result.data.tools || [];
+            const toolsString = tools.length > 0 ? tools.join(', ') : "default tools";
+            alert(`Success! You have been granted access to: ${toolsString}\n\nYou can now launch these tools from the hub.`);
+            
+            // Clear the URL parameter
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Re-check admin status and refresh stats (might have gained permissions)
+            checkAdminAccess();
+          }
+        } catch (error) {
+          console.error("[Invite] Consumption error:", error);
+          alert("Failed to accept invite: " + (error.message || "Unknown error"));
+          // Clear query param even on failure to prevent loops
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
       }
     </script>

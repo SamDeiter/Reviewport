@@ -861,15 +861,16 @@
       async function initFirebase() {
         try {
           // Same config as Question Generator
-          // Firebase config - API key should be restricted in Firebase Console
-          // See: https://firebase.google.com/docs/projects/api-keys#apply-restrictions
+          // Firebase config for ue5-questions-prod
+          // API key is restricted to *.samdeiter.github.io/* in Firebase Console
           const firebaseConfig = {
-            apiKey: "YOUR_API_KEY", // Replace with restricted API key
-            authDomain: "ue5questiongenerator.firebaseapp.com",
-            projectId: "ue5questiongenerator",
-            storageBucket: "ue5questiongenerator.firebasestorage.app",
-            messagingSenderId: "295819632007",
-            appId: "1:295819632007:web:7f8cdbd61f5d79ceb28f3d",
+            apiKey: "AIzaSyBLC5QzwPMYloqCle9zxTJYMHyZbEtnDMC",
+            authDomain: "ue5-questions-prod.firebaseapp.com",
+            projectId: "ue5-questions-prod",
+            storageBucket: "ue5-questions-prod.firebasestorage.app",
+            messagingSenderId: "15582589888",
+            appId: "1:15582589888:web:b767b6bb3a16bf5f42695b5",
+            measurementId: "G-3L7FJ56DMH"
           };
 
           firebase.initializeApp(firebaseConfig);

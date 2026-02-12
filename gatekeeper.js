@@ -55,6 +55,8 @@
     if (path.includes("scenario")) return "scenario";
     if (path.includes("question")) return "questions";
     if (path.includes("material")) return "materials";
+    if (path.includes("learning") || path.includes("tagging"))
+      return "learning-path";
     return "unknown";
   }
 

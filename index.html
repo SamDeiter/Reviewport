@@ -1483,7 +1483,7 @@
           // Update header with user info
           userArea.innerHTML = `
             <div class="user-profile">
-              <img src="${user.photoURL || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.displayName || "User")}" alt="${user.displayName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || "User")}&background=667eea&color=fff'">
+              <img src="${user.photoURL || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.displayName || "User")}" alt="${user.displayName}" referrerPolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || "User")}&background=667eea&color=fff'">
               <span class="user-name">${user.displayName || user.email}</span>
               <button class="logout-btn" onclick="signOut()">Sign Out</button>
             </div>

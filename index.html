@@ -268,6 +268,9 @@
       .tool-card.material {
         --card-accent: var(--accent-orange);
       }
+      .tool-card.learning-path {
+        --card-accent: #06b6d4;
+      }
 
       .tool-header {
         display: flex;
@@ -298,6 +301,9 @@
       }
       .tool-card.material .tool-icon {
         color: var(--accent-orange);
+      }
+      .tool-card.learning-path .tool-icon {
+        color: #06b6d4;
       }
 
       .tool-status {
@@ -793,7 +799,7 @@
             <div class="stat-label">Reviews Pending</div>
           </div>
           <div class="stat">
-            <div class="stat-value">3</div>
+            <div class="stat-value">4</div>
             <div class="stat-label">Active Tools</div>
           </div>
         </div>
@@ -982,6 +988,52 @@
               </button>
             </div>
           </div>
+
+          <!-- Learning Path Builder -->
+          <div
+            class="tool-card learning-path"
+            onclick="launchTool('learning-path')"
+          >
+            <div class="tool-header">
+              <div class="tool-icon">
+                <i class="fas fa-route"></i>
+              </div>
+              <div class="tool-status" id="learning-path-status">
+                <span class="dot"></span>
+                Available
+              </div>
+            </div>
+            <h3 class="tool-title">Learning Path Builder</h3>
+            <p class="tool-description">
+              Problem-first learning platform with AI-narrated video paths,
+              transcript search, and enriched course tagging across 155 courses.
+            </p>
+            <div class="tool-stats">
+              <span><i class="fas fa-video"></i> 155 Courses</span>
+              <span><i class="fas fa-tags"></i> 5-Dim Tags</span>
+              <span><i class="fas fa-brain"></i> AI Narrated</span>
+            </div>
+            <div class="tool-actions">
+              <button
+                class="btn btn-primary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('learning-path');
+                "
+              >
+                <i class="fas fa-play"></i> Launch
+              </button>
+              <button
+                class="btn btn-secondary"
+                onclick="
+                  event.stopPropagation();
+                  launchTool('learning-path-review');
+                "
+              >
+                <i class="fas fa-search"></i> Review Mode
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Unified Access Management (Admins Only) -->
@@ -1053,6 +1105,17 @@
                       style="font-size: 0.75rem; color: var(--text-secondary)"
                     >
                       Shader & material logic evaluation
+                    </div>
+                  </div>
+                </label>
+                <label class="tool-checkbox">
+                  <input type="checkbox" name="tool" value="learning-path" />
+                  <div>
+                    <div style="font-weight: 500">Learning Path Builder</div>
+                    <div
+                      style="font-size: 0.75rem; color: var(--text-secondary)"
+                    >
+                      AI-powered learning paths & course tagging
                     </div>
                   </div>
                 </label>
@@ -1210,6 +1273,10 @@
         materials: "https://samdeiter.github.io/UE5LMSMaterials/",
         "materials-review":
           "https://samdeiter.github.io/UE5LMSMaterials/?mode=review",
+        "learning-path":
+          "https://samdeiter.github.io/Unreal-Learning-Path-Tagging-System/",
+        "learning-path-review":
+          "https://samdeiter.github.io/Unreal-Learning-Path-Tagging-System/?mode=review",
       };
 
       // Google Drive configuration for screenshot storage

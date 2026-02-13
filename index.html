@@ -92,9 +92,7 @@
         align-items: center;
         border-bottom: 1px solid var(--border);
         backdrop-filter: blur(10px);
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        position: relative;
       }
 
       .logo {
@@ -1190,54 +1188,6 @@
             </div>
           </div>
         </section>
-
-        <!-- Quick Actions -->
-        <h2 class="section-title">
-          <i class="fas fa-bolt"></i>
-          Quick Actions
-        </h2>
-
-        <div class="quick-actions">
-          <a
-            class="quick-action"
-            href="https://samdeiter.github.io/UE5LMSBlueprint/?mode=review"
-            target="_blank"
-          >
-            <i class="fas fa-clipboard-check"></i>
-            <h4>Review Blueprint Scenarios</h4>
-            <p>Open Blueprint Editor in Review Mode</p>
-          </a>
-          <a
-            class="quick-action"
-            href="./tools/scenario-review/index.html"
-            target="_blank"
-          >
-            <i class="fas fa-edit"></i>
-            <h4>Review Text Scenarios</h4>
-            <p>Open Scenario Tracker for text reviews</p>
-          </a>
-          <a
-            class="quick-action"
-            href="#"
-            onclick="
-              exportReport();
-              return false;
-            "
-          >
-            <i class="fas fa-file-export"></i>
-            <h4>Export Review Report</h4>
-            <p>Generate a summary of all reviews</p>
-          </a>
-          <a
-            class="quick-action"
-            href="https://drive.google.com/drive/folders/1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH"
-            target="_blank"
-          >
-            <i class="fab fa-google-drive"></i>
-            <h4>Open Drive Folder</h4>
-            <p>View screenshots and review data</p>
-          </a>
-        </div>
       </main>
 
       <footer>

@@ -1,18 +1,26 @@
 /**
- * Reviewport Gatekeeper v1.1
+ * Reviewport Gatekeeper v1.2
  * Enforces authentication and tool-specific access control for UE5 educational tools.
  * Hosted at: https://samdeiter.github.io/Reviewport/gatekeeper.js
+ *
+ * v1.2 Fixes:
+ * - CSS: Overlay now renders independently of the body-hide rule
+ * - Timeout: checkToolAccess has a 10s timeout fallback
  */
 (function () {
   const HUB_URL = "https://samdeiter.github.io/Reviewport/";
   const ALLOWED_DOMAIN = "@epicgames.com";
   const GATEKEEPER_STYLE_ID = "gatekeeper-style";
 
-  // 1. Immediately hide the body to prevent flash of content
+  // 1. Immediately hide ALL page content (but not the gatekeeper overlay)
   if (!document.getElementById(GATEKEEPER_STYLE_ID)) {
     const style = document.createElement("style");
     style.id = GATEKEEPER_STYLE_ID;
-    style.innerHTML = "body { display: none !important; }";
+    // Hide everything in body EXCEPT our overlay, so overlay always renders
+    style.innerHTML = `
+      body > *:not(#gatekeeper-overlay) { display: none !important; }
+      #gatekeeper-overlay { display: block !important; }
+    `;
     document.head.appendChild(style);
   }
 
@@ -83,9 +91,7 @@
                         <div style="font-size:0.8rem;color:#8b949e;">Please wait while we check your credentials.</div>
                     </div>
                 `;
-            document.body.style.display = "block"; // Allow body to show overlay but keep content hidden via GATEKEEPER_STYLE_ID if it targets #app-container or similar?
-            // Actually, the style targets body, so we need a different approach.
-            // Let's modify the style to hide a likely app container OR just keep it hidden and use a different element.
+            // Overlay is excluded from the hide rule via :not(#gatekeeper-overlay)
             document.body.appendChild(overlay);
           }
         }
@@ -105,7 +111,17 @@
         const toolId = getCurrentToolId();
         try {
           const checkFn = functions.httpsCallable("checkToolAccess");
-          const result = await checkFn({ toolId: toolId });
+
+          // Race the cloud function against a 10-second timeout
+          const TIMEOUT_MS = 10000;
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Access check timed out")), TIMEOUT_MS)
+          );
+
+          const result = await Promise.race([
+            checkFn({ toolId: toolId }),
+            timeoutPromise,
+          ]);
 
           if (!result.data || !result.data.hasAccess) {
             denyAccess("not_invited");
@@ -113,6 +129,7 @@
             grantAccess();
           }
         } catch (error) {
+          console.error("[Gatekeeper] Access check failed:", error.message);
           denyAccess("error");
         }
       });

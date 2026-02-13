@@ -1437,7 +1437,7 @@
           const fallbackUrl = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || 'User') + '&background=667eea&color=fff&size=96';
           userArea.innerHTML = `
             <div class="user-profile">
-              <img src="${avatarUrl || fallbackUrl}" alt="${user.displayName || ''}" referrerPolicy="no-referrer" crossorigin="anonymous" onerror="this.onerror=null; this.src='${fallbackUrl}';">
+              <img src="${avatarUrl || fallbackUrl}" alt="${user.displayName || ''}" referrerPolicy="no-referrer" onerror="this.onerror=null; this.src='${fallbackUrl}';">
               <span class="user-name">${user.displayName || user.email}</span>
               <button class="logout-btn" onclick="signOut()">Sign Out</button>
             </div>

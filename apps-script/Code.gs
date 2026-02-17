@@ -1,5 +1,5 @@
 /**
- * Google Apps Script — Review Storage API
+ * Google Apps Script — Review Storage API v2
  *
  * Setup:
  * 1. Create a new Google Sheet (name it "Reviewport Reviews")
@@ -11,6 +11,9 @@
  *    - Who has access: Anyone
  * 5. Authorize when prompted
  * 6. Copy the Web App URL — this is your SCRIPT_URL
+ *
+ * v2: Added JSONP support for cross-origin reads from Workspace domains.
+ *     Handles sendBeacon POSTs (application/json content type).
  */
 
 /**
@@ -60,17 +63,28 @@ function doPost(e) {
 
 /**
  * Handle GET requests — load reviews for a tool + reviewer
+ * Supports JSONP via ?callback=functionName parameter for cross-origin reads.
  */
 function doGet(e) {
   try {
     var toolId = e.parameter.toolId;
     var email = e.parameter.email;
+    var callback = e.parameter.callback;
 
     // Health check
     if (!toolId) {
-      return ContentService.createTextOutput(
-        JSON.stringify({ status: "ok", message: "Review Storage API is live" }),
-      ).setMimeType(ContentService.MimeType.JSON);
+      var healthResponse = JSON.stringify({
+        status: "ok",
+        message: "Review Storage API v2 is live",
+      });
+      if (callback) {
+        return ContentService.createTextOutput(
+          callback + "(" + healthResponse + ")",
+        ).setMimeType(ContentService.MimeType.JAVASCRIPT);
+      }
+      return ContentService.createTextOutput(healthResponse).setMimeType(
+        ContentService.MimeType.JSON,
+      );
     }
 
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -98,12 +112,31 @@ function doGet(e) {
       }
     }
 
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: true, reviews: reviews }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    var jsonResponse = JSON.stringify({ success: true, reviews: reviews });
+
+    // Return as JSONP if callback is specified (bypasses CORS)
+    if (callback) {
+      return ContentService.createTextOutput(
+        callback + "(" + jsonResponse + ")",
+      ).setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+
+    return ContentService.createTextOutput(jsonResponse).setMimeType(
+      ContentService.MimeType.JSON,
+    );
   } catch (err) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: false, error: err.message }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    var errorResponse = JSON.stringify({
+      success: false,
+      error: err.message,
+    });
+    var cb = e.parameter.callback;
+    if (cb) {
+      return ContentService.createTextOutput(
+        cb + "(" + errorResponse + ")",
+      ).setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    return ContentService.createTextOutput(errorResponse).setMimeType(
+      ContentService.MimeType.JSON,
+    );
   }
 }

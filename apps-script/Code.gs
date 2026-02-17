@@ -54,6 +54,11 @@ function doPost(e) {
       return handleScreenshot(data);
     }
 
+    // Route: clear all data (admin)
+    if (data.action === "clearAll") {
+      return handleClearAll();
+    }
+
     // Route: regular review save
     return handleReviewSave(data);
   } catch (err) {
@@ -102,6 +107,32 @@ function handleReviewSave(data) {
 
   return ContentService.createTextOutput(
     JSON.stringify({ success: true }),
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+/**
+ * Clear all data rows from the sheet (keep header).
+ * Also clears screenshots from the Drive folder.
+ */
+function handleClearAll() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.deleteRows(2, lastRow - 1);
+  }
+
+  // Clear Drive folder screenshots
+  try {
+    var folder = DriveApp.getFolderById(SCREENSHOT_FOLDER_ID);
+    var files = folder.getFiles();
+    while (files.hasNext()) {
+      files.next().setTrashed(true);
+    }
+  } catch (e) {
+    // Folder might not exist yet, that's fine
+  }
+
+  return ContentService.createTextOutput(
+    JSON.stringify({ success: true, message: "All data cleared" }),
   ).setMimeType(ContentService.MimeType.JSON);
 }
 

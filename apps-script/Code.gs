@@ -1,5 +1,5 @@
 /**
- * Google Apps Script — Review Storage API v2
+ * Google Apps Script — Review Storage API v3
  *
  * Setup:
  * 1. Create a new Google Sheet (name it "Reviewport Reviews")
@@ -12,16 +12,38 @@
  * 5. Authorize when prompted
  * 6. Copy the Web App URL — this is your SCRIPT_URL
  *
- * v2: Added JSONP support for cross-origin reads from Workspace domains.
- *     Handles sendBeacon POSTs (application/json content type).
+ * v3: doPost reads from e.parameter (form fields) to support
+ *     hidden-form submissions that survive 302 redirects.
+ *     doGet supports JSONP callbacks for cross-origin reads.
  */
 
 /**
- * Handle POST requests — save a review row
+ * Handle POST requests — save a review row.
+ * Accepts BOTH form-encoded data (e.parameter) and JSON body (e.postData).
  */
 function doPost(e) {
   try {
-    var data = JSON.parse(e.postData.contents);
+    // Try form parameters first (hidden form submission),
+    // fall back to JSON body (fetch/sendBeacon)
+    var data;
+    if (e.parameter && e.parameter.toolId) {
+      data = e.parameter;
+      // highlights comes as a JSON string from the form
+      if (typeof data.highlights === "string") {
+        try {
+          data.highlights = JSON.parse(data.highlights);
+        } catch (ignored) {
+          data.highlights = [];
+        }
+      }
+    } else if (e.postData && e.postData.contents) {
+      data = JSON.parse(e.postData.contents);
+    } else {
+      return ContentService.createTextOutput(
+        JSON.stringify({ success: false, error: "No data received" }),
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
     // Ensure header row exists
@@ -62,8 +84,8 @@ function doPost(e) {
 }
 
 /**
- * Handle GET requests — load reviews for a tool + reviewer
- * Supports JSONP via ?callback=functionName parameter for cross-origin reads.
+ * Handle GET requests — load reviews for a tool + reviewer.
+ * Supports JSONP via ?callback=functionName for cross-origin reads.
  */
 function doGet(e) {
   try {
@@ -75,7 +97,7 @@ function doGet(e) {
     if (!toolId) {
       var healthResponse = JSON.stringify({
         status: "ok",
-        message: "Review Storage API v2 is live",
+        message: "Review Storage API v3 is live",
       });
       if (callback) {
         return ContentService.createTextOutput(

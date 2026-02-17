@@ -1,5 +1,5 @@
 /**
- * Google Apps Script — Review Storage API v3
+ * Google Apps Script — Review Storage API v4
  *
  * Setup:
  * 1. Create a new Google Sheet (name it "Reviewport Reviews")
@@ -12,21 +12,26 @@
  * 5. Authorize when prompted
  * 6. Copy the Web App URL — this is your SCRIPT_URL
  *
- * v3: doPost reads from e.parameter (form fields) to support
+ * v4: Added screenshot upload to Google Drive with embedded IMAGE() in Sheet.
+ *     doPost reads from e.parameter (form fields) to support
  *     hidden-form submissions that survive 302 redirects.
  *     doGet supports JSONP callbacks for cross-origin reads.
  */
 
+// Google Drive folder for screenshots
+var SCREENSHOT_FOLDER_ID = "1QUjAnB8HxcsKsLDewC9kzdcJQtsezJCH";
+
 /**
- * Handle POST requests — save a review row.
- * Accepts BOTH form-encoded data (e.parameter) and JSON body (e.postData).
+ * Handle POST requests — save a review row OR upload a screenshot.
+ * Accepts form-encoded data (e.parameter) and JSON body (e.postData).
+ *
+ * For screenshots, send action=screenshot with base64 image data.
  */
 function doPost(e) {
   try {
-    // Try form parameters first (hidden form submission),
-    // fall back to JSON body (fetch/sendBeacon)
+    // Parse data from form parameters or JSON body
     var data;
-    if (e.parameter && e.parameter.toolId) {
+    if (e.parameter && (e.parameter.toolId || e.parameter.action)) {
       data = e.parameter;
       // highlights comes as a JSON string from the form
       if (typeof data.highlights === "string") {
@@ -44,43 +49,177 @@ function doPost(e) {
       ).setMimeType(ContentService.MimeType.JSON);
     }
 
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
-    // Ensure header row exists
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "timestamp",
-        "toolId",
-        "itemId",
-        "itemTitle",
-        "status",
-        "note",
-        "highlights",
-        "reviewerEmail",
-        "reviewerName",
-      ]);
+    // Route: screenshot upload
+    if (data.action === "screenshot") {
+      return handleScreenshot(data);
     }
 
-    sheet.appendRow([
-      new Date().toISOString(),
-      data.toolId || "",
-      data.itemId || "",
-      data.itemTitle || "",
-      data.status || "",
-      data.note || "",
-      JSON.stringify(data.highlights || []),
-      data.reviewerEmail || "",
-      data.reviewerName || "",
-    ]);
-
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: true }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    // Route: regular review save
+    return handleReviewSave(data);
   } catch (err) {
     return ContentService.createTextOutput(
       JSON.stringify({ success: false, error: err.message }),
     ).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+/**
+ * Save a review row to the active sheet.
+ */
+function handleReviewSave(data) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  // Ensure header row exists
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow([
+      "timestamp",
+      "toolId",
+      "itemId",
+      "itemTitle",
+      "status",
+      "note",
+      "highlights",
+      "reviewerEmail",
+      "reviewerName",
+      "screenshot",
+      "screenshotUrl",
+    ]);
+  }
+
+  sheet.appendRow([
+    new Date().toISOString(),
+    data.toolId || "",
+    data.itemId || "",
+    data.itemTitle || "",
+    data.status || "",
+    data.note || "",
+    JSON.stringify(data.highlights || []),
+    data.reviewerEmail || "",
+    data.reviewerName || "",
+    "", // screenshot (IMAGE formula added by screenshot upload)
+    "", // screenshotUrl
+  ]);
+
+  return ContentService.createTextOutput(
+    JSON.stringify({ success: true }),
+  ).setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Handle screenshot upload: save base64 PNG to Google Drive,
+ * then write =IMAGE() formula + raw URL into the Sheet.
+ */
+function handleScreenshot(data) {
+  var base64Data = data.imageData;
+  if (!base64Data) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: "No imageData provided" }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Remove data URL prefix if present
+  if (base64Data.indexOf(",") > -1) {
+    base64Data = base64Data.split(",")[1];
+  }
+
+  // Decode base64 to blob
+  var decoded = Utilities.base64Decode(base64Data);
+  var blob = Utilities.newBlob(decoded, "image/png");
+
+  // Build filename: toolId_itemId_timestamp.png
+  var timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  var fileName =
+    (data.toolId || "unknown") +
+    "_" +
+    (data.itemId || "unknown") +
+    "_" +
+    timestamp +
+    ".png";
+  blob.setName(fileName);
+
+  // Save to Drive folder
+  var folder = DriveApp.getFolderById(SCREENSHOT_FOLDER_ID);
+  var file = folder.createFile(blob);
+
+  // Make viewable by anyone with the link
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  // Build URLs
+  var fileId = file.getId();
+  var viewUrl = "https://drive.google.com/file/d/" + fileId + "/view";
+  // Direct thumbnail URL for =IMAGE() formula
+  var thumbnailUrl =
+    "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w400";
+
+  // Find the matching row in the Sheet and add the screenshot
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var dataRange = sheet.getDataRange().getValues();
+  var headers = dataRange[0];
+
+  // Find column indices
+  var colScreenshot = headers.indexOf("screenshot");
+  var colScreenshotUrl = headers.indexOf("screenshotUrl");
+  var colItemId = headers.indexOf("itemId");
+  var colToolId = headers.indexOf("toolId");
+
+  // If headers don't have screenshot columns yet, add them
+  if (colScreenshot === -1) {
+    colScreenshot = headers.length;
+    sheet.getRange(1, colScreenshot + 1).setValue("screenshot");
+  }
+  if (colScreenshotUrl === -1) {
+    colScreenshotUrl = headers.length + 1;
+    sheet.getRange(1, colScreenshotUrl + 1).setValue("screenshotUrl");
+  }
+
+  // Find the most recent matching row (search from bottom)
+  var targetRow = -1;
+  for (var i = dataRange.length - 1; i >= 1; i--) {
+    if (
+      dataRange[i][colToolId] === data.toolId &&
+      dataRange[i][colItemId] === data.itemId
+    ) {
+      targetRow = i + 1; // Sheet rows are 1-indexed
+      break;
+    }
+  }
+
+  if (targetRow > 0) {
+    // Update existing row with screenshot
+    sheet
+      .getRange(targetRow, colScreenshot + 1)
+      .setFormula('=IMAGE("' + thumbnailUrl + '")');
+    sheet.getRange(targetRow, colScreenshotUrl + 1).setValue(viewUrl);
+  } else {
+    // No matching review row — append a new row with just the screenshot
+    var newRow = [];
+    for (var k = 0; k < Math.max(colScreenshotUrl + 1, headers.length); k++) {
+      newRow.push("");
+    }
+    newRow[0] = new Date().toISOString();
+    newRow[colToolId] = data.toolId || "";
+    newRow[colItemId] = data.itemId || "";
+    newRow[colScreenshot] = '=IMAGE("' + thumbnailUrl + '")';
+    newRow[colScreenshotUrl] = viewUrl;
+    if (headers.indexOf("reviewerEmail") > -1) {
+      newRow[headers.indexOf("reviewerEmail")] = data.reviewerEmail || "";
+    }
+    sheet.appendRow(newRow);
+    // Set the IMAGE formula (appendRow doesn't support formulas)
+    var lastRow = sheet.getLastRow();
+    sheet
+      .getRange(lastRow, colScreenshot + 1)
+      .setFormula('=IMAGE("' + thumbnailUrl + '")');
+  }
+
+  return ContentService.createTextOutput(
+    JSON.stringify({
+      success: true,
+      fileId: fileId,
+      viewUrl: viewUrl,
+      thumbnailUrl: thumbnailUrl,
+    }),
+  ).setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
@@ -97,7 +236,7 @@ function doGet(e) {
     if (!toolId) {
       var healthResponse = JSON.stringify({
         status: "ok",
-        message: "Review Storage API v3 is live",
+        message: "Review Storage API v4 is live",
       });
       if (callback) {
         return ContentService.createTextOutput(

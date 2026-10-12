@@ -40,22 +40,20 @@
 
         // 2. Check per-tool access for external users
         try {
-          // Normalize toolId (e.g., 'blueprint-review' -> 'blueprint')
-          const baseToolId = toolId.split("-")[0];
+          const result = await ReviewportAccess.call("check", {
+            tool: toolId.replace(/-review$/, ""),
+          });
 
-          const checkAccessFn = functions.httpsCallable("checkToolAccess");
-          const result = await checkAccessFn({ toolId: baseToolId });
-
-          if (result.data.hasAccess) {
+          if (result.hasAccess) {
             window.open(url, "_blank");
           } else {
             alert(
-              `Access Denied: You do not have permission to access the ${baseToolId} tool. Please request an invite link for this tool.`,
+              `Access Denied: You do not have permission to access this tool. Please request an invite link for it.`,
             );
           }
         } catch (error) {
           console.error("[Access] Check failed:", error);
-          alert("Failed to verify access. Please try again later.");
+          alert("Failed to verify access: " + error.message);
         }
       }
 
@@ -191,16 +189,13 @@
       // External users who accepted an invite earlier hold per-tool access
       // server-side, so they can sign back in without the ?invite= param.
       async function hasAnyToolAccess() {
-        const checkFn = functions.httpsCallable("checkToolAccess");
-        const toolIds = Object.keys(TOOLS).map((id) => id.split("-")[0]);
-        const results = await Promise.all(
-          [...new Set(toolIds)].map((toolId) =>
-            checkFn({ toolId })
-              .then((r) => !!(r.data && r.data.hasAccess))
-              .catch(() => false),
-          ),
-        );
-        return results.some(Boolean);
+        try {
+          const result = await ReviewportAccess.call("me");
+          return result.access.tools.length > 0;
+        } catch (error) {
+          console.error("[Access] Lookup failed:", error);
+          return false;
+        }
       }
 
       async function handleAuthStateChange(user) {
@@ -368,18 +363,8 @@
             return;
           }
 
-          const checkFn = functions.httpsCallable("checkUserRegistration");
-          const result = await checkFn({});
-          const userData = result.data;
-
-          console.log("[Admin] Registration check result:", userData);
-
-          if (userData && userData.role === "admin") {
-            console.log("[Admin] Access detected via registry");
-            document.getElementById("admin-panel").classList.add("visible");
-          } else {
-            console.log("[Admin] No admin role detected");
-          }
+          // Everyone else is a non-admin; admin = verified @epicgames.com
+          console.log("[Admin] No admin role detected");
         } catch (error) {
           console.error("[Admin] Access check failed:", error);
         }
@@ -411,42 +396,29 @@
             Math.max(1, parseInt(document.getElementById("invite-count").value, 10) || 1),
           );
 
-          // Each code is single-use, so a batch is N separate invites,
-          // created one at a time to avoid hammering the function.
-          const createFn = functions.httpsCallable("createInvite");
           const baseUrl = window.location.origin + window.location.pathname;
-          let sendRole = true;
-          let lastError = null;
           generatedInviteUrls = [];
+          let lastError = null;
 
-          for (let i = 0; i < count; i++) {
-            const payload = { tools: selectedTools, expiresInDays: 7 };
-            if (sendRole) payload.role = role;
-            try {
-              const result = await createFn(payload);
-              if (result.data && result.data.success) {
-                generatedInviteUrls.push(`${baseUrl}?invite=${result.data.code}`);
-              }
-            } catch (error) {
-              lastError = error;
-              console.error("Invite generation error:", error);
-              // The backend may not know about "role" yet; retry once without it
-              if (sendRole && generatedInviteUrls.length === 0) {
-                sendRole = false;
-                i--;
-                continue;
-              }
-              break;
-            }
+          try {
+            const result = await ReviewportAccess.call("createInvites", {
+              tools: selectedTools.join(","),
+              role,
+              count,
+              expiresInDays: 7,
+            });
+            generatedInviteUrls = result.codes.map(
+              (code) => `${baseUrl}?invite=${code}`,
+            );
+          } catch (error) {
+            lastError = error;
+            console.error("Invite generation error:", error);
           }
 
-          renderInviteList(role, sendRole);
+          renderInviteList(role);
 
-          if (lastError && generatedInviteUrls.length < count) {
-            alert(
-              `Created ${generatedInviteUrls.length} of ${count} invites. Error: ` +
-                `${lastError.code || ""} ${lastError.message}`,
-            );
+          if (lastError) {
+            alert("Failed to generate invites: " + lastError.message);
           }
         } finally {
           btn.disabled = false;
@@ -454,7 +426,7 @@
         }
       }
 
-      function renderInviteList(role, roleSent) {
+      function renderInviteList(role) {
         const area = document.getElementById("invite-link-area");
         const list = document.getElementById("invite-list");
         list.innerHTML = "";
@@ -465,8 +437,7 @@
 
         const roleLabel = role === "viewer" ? "Viewer" : "Editor";
         document.getElementById("invite-list-heading").textContent =
-          `${generatedInviteUrls.length} invite(s) generated - ${roleLabel}` +
-          (roleSent ? "" : " (role not applied: backend does not support it yet)");
+          `${generatedInviteUrls.length} invite(s) generated - ${roleLabel}`;
 
         generatedInviteUrls.forEach((url, i) => {
           const row = document.createElement("div");
@@ -525,51 +496,6 @@
         }, 2000);
       }
 
-      async function runAccessMigration() {
-        if (
-          !confirm(
-            "This will add 'questions' tool access to all existing users. Proceed?",
-          )
-        )
-          return;
-
-        const statusEl = document.getElementById("system-status");
-        try {
-          statusEl.textContent = "Running migration...";
-          statusEl.style.color = "var(--accent-blue)";
-
-          const migrateFn = functions.httpsCallable(
-            "runUnifiedAccessMigration",
-          );
-          const result = await migrateFn({});
-
-          statusEl.textContent = `Migration complete: ${result.data.message}`;
-          statusEl.style.color = "var(--accent-green)";
-        } catch (error) {
-          console.error("Migration error:", error);
-          statusEl.textContent = "Migration failed: " + error.message;
-          statusEl.style.color = "var(--accent-red)";
-        }
-      }
-
-      async function seedToolRegistry() {
-        const statusEl = document.getElementById("system-status");
-        try {
-          statusEl.textContent = "Seeding registry...";
-          statusEl.style.color = "var(--accent-blue)";
-
-          const seedFn = functions.httpsCallable("seedToolRegistry");
-          const result = await seedFn({});
-
-          statusEl.textContent = `Registry seeded: ${result.data.message}`;
-          statusEl.style.color = "var(--accent-green)";
-        } catch (error) {
-          console.error("Seeding error:", error);
-          statusEl.textContent = "Seeding failed: " + error.message;
-          statusEl.style.color = "var(--accent-red)";
-        }
-      }
-
       async function checkInviteCode() {
         const urlParams = new URLSearchParams(window.location.search);
         const inviteCode = urlParams.get("invite");
@@ -578,15 +504,16 @@
 
         try {
           console.log(`[Invite] Attempting to consume code: ${inviteCode}`);
-          const consumeFn = functions.httpsCallable("consumeInvite");
-          const result = await consumeFn({ code: inviteCode });
+          const result = await ReviewportAccess.call("redeem", { code: inviteCode });
 
-          if (result.data && result.data.success) {
-            const tools = result.data.tools || [];
+          if (result.ok) {
+            const tools = result.tools || [];
             const toolsString =
               tools.length > 0 ? tools.join(", ") : "default tools";
             alert(
-              `Success! You have been granted access to: ${toolsString}\n\nYou can now launch these tools from the hub.`,
+              `Success! You have been granted ${result.role} access to: ${toolsString}
+
+You can now launch these tools from the hub.`,
             );
 
             // Clear the URL parameter

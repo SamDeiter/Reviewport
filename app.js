@@ -385,8 +385,10 @@
         }
       }
 
-      async function generateInviteLink() {
-        const btn = event.target;
+      let generatedInviteUrls = [];
+
+      async function generateInviteLink(event) {
+        const btn = event.currentTarget;
         const originalText = btn.innerHTML;
 
         try {
@@ -409,44 +411,116 @@
             Math.max(1, parseInt(document.getElementById("invite-count").value, 10) || 1),
           );
 
-          // Each code is single-use, so a batch is N separate invites
+          // Each code is single-use, so a batch is N separate invites,
+          // created one at a time to avoid hammering the function.
           const createFn = functions.httpsCallable("createInvite");
-          const results = await Promise.all(
-            Array.from({ length: count }, () =>
-              createFn({ tools: selectedTools, role, expiresInDays: 7 }),
-            ),
-          );
-
           const baseUrl = window.location.origin + window.location.pathname;
-          const urls = results
-            .filter((r) => r.data.success)
-            .map((r) => `${baseUrl}?invite=${r.data.code}`);
+          let sendRole = true;
+          let lastError = null;
+          generatedInviteUrls = [];
 
-          if (urls.length > 0) {
-            document.getElementById("invite-url").value = urls.join("\n");
-            document.getElementById("invite-link-area").classList.add("visible");
+          for (let i = 0; i < count; i++) {
+            const payload = { tools: selectedTools, expiresInDays: 7 };
+            if (sendRole) payload.role = role;
+            try {
+              const result = await createFn(payload);
+              if (result.data && result.data.success) {
+                generatedInviteUrls.push(`${baseUrl}?invite=${result.data.code}`);
+              }
+            } catch (error) {
+              lastError = error;
+              console.error("Invite generation error:", error);
+              // The backend may not know about "role" yet; retry once without it
+              if (sendRole && generatedInviteUrls.length === 0) {
+                sendRole = false;
+                i--;
+                continue;
+              }
+              break;
+            }
           }
-        } catch (error) {
-          console.error("Invite generation error:", error);
-          alert("Failed to generate invite: " + error.message);
+
+          renderInviteList(role, sendRole);
+
+          if (lastError && generatedInviteUrls.length < count) {
+            alert(
+              `Created ${generatedInviteUrls.length} of ${count} invites. Error: ` +
+                `${lastError.code || ""} ${lastError.message}`,
+            );
+          }
         } finally {
           btn.disabled = false;
           btn.innerHTML = originalText;
         }
       }
 
-      function copyInviteUrl() {
-        const input = document.getElementById("invite-url");
-        input.select();
-        document.execCommand("copy");
+      function renderInviteList(role, roleSent) {
+        const area = document.getElementById("invite-link-area");
+        const list = document.getElementById("invite-list");
+        list.innerHTML = "";
+        if (generatedInviteUrls.length === 0) {
+          area.classList.remove("visible");
+          return;
+        }
 
-        const btn = event.currentTarget;
-        const originalIcon = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i>';
+        const roleLabel = role === "viewer" ? "Viewer" : "Editor";
+        document.getElementById("invite-list-heading").textContent =
+          `${generatedInviteUrls.length} invite(s) generated - ${roleLabel}` +
+          (roleSent ? "" : " (role not applied: backend does not support it yet)");
+
+        generatedInviteUrls.forEach((url, i) => {
+          const row = document.createElement("div");
+          row.className = "copy-area";
+          row.style.marginTop = "0.5rem";
+
+          const label = document.createElement("span");
+          label.textContent = `Invite ${i + 1}:`;
+          label.style.cssText = "white-space:nowrap;font-size:0.875rem;align-self:center;";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.className = "copy-input";
+          input.readOnly = true;
+          input.value = url;
+
+          const copyBtn = document.createElement("button");
+          copyBtn.className = "btn btn-secondary";
+          copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+          copyBtn.onclick = () => copyText(url, copyBtn);
+
+          row.append(label, input, copyBtn);
+          list.appendChild(row);
+        });
+
+        area.classList.add("visible");
+      }
+
+      // Plain-text block ready to paste into an email
+      function copyAllInvites(event) {
+        const role = document.getElementById("invite-role").value;
+        const roleLabel = role === "viewer" ? "Viewer" : "Editor";
+        const text = generatedInviteUrls
+          .map((url, i) => `Invite ${i + 1} (${roleLabel}): ${url}`)
+          .join("\n");
+        copyText(text, event.currentTarget);
+      }
+
+      async function copyText(text, btn) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (e) {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied';
         btn.style.color = "var(--accent-green)";
-
         setTimeout(() => {
-          btn.innerHTML = originalIcon;
+          btn.innerHTML = originalHtml;
           btn.style.color = "";
         }, 2000);
       }

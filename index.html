@@ -465,42 +465,6 @@
               </div>
             </div>
 
-            <!-- System Migration Tools -->
-            <div class="admin-card">
-              <h3><i class="fas fa-database"></i> System Tools</h3>
-              <p
-                style="
-                  font-size: 0.875rem;
-                  color: var(--text-secondary);
-                  margin-bottom: 1.5rem;
-                "
-              >
-                Critical system maintenance and initialization tools.
-              </p>
-              <div class="admin-actions">
-                <button
-                  class="btn btn-secondary system-btn"
-                  onclick="runAccessMigration()"
-                >
-                  <i class="fas fa-sync-alt"></i> Run Access Migration (Legacy
-                  Users)
-                </button>
-                <button
-                  class="btn btn-secondary system-btn"
-                  onclick="seedToolRegistry()"
-                >
-                  <i class="fas fa-seedling"></i> Seed Tool Registry
-                </button>
-                <div
-                  id="system-status"
-                  style="
-                    font-size: 0.75rem;
-                    margin-top: 1rem;
-                    text-align: center;
-                  "
-                ></div>
-              </div>
-            </div>
           </div>
         </section>
       </main>
@@ -523,6 +487,7 @@
     </div>
     <!-- End app-content -->
 
+    <script src="access-api.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

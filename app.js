@@ -188,7 +188,22 @@
         }
       }
 
-      function handleAuthStateChange(user) {
+      // External users who accepted an invite earlier hold per-tool access
+      // server-side, so they can sign back in without the ?invite= param.
+      async function hasAnyToolAccess() {
+        const checkFn = functions.httpsCallable("checkToolAccess");
+        const toolIds = Object.keys(TOOLS).map((id) => id.split("-")[0]);
+        const results = await Promise.all(
+          [...new Set(toolIds)].map((toolId) =>
+            checkFn({ toolId })
+              .then((r) => !!(r.data && r.data.hasAccess))
+              .catch(() => false),
+          ),
+        );
+        return results.some(Boolean);
+      }
+
+      async function handleAuthStateChange(user) {
         const loginOverlay = document.getElementById("login-overlay");
         const appContent = document.getElementById("app-content");
         const userArea = document.getElementById("user-area");
@@ -200,13 +215,12 @@
 
           if (
             !hasInvite &&
-            !user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase())
+            !user.email.toLowerCase().endsWith(ALLOWED_DOMAIN.toLowerCase()) &&
+            !(await hasAnyToolAccess())
           ) {
-            console.warn(
-              `[Auth] Rejected: ${user.email} (not ${ALLOWED_DOMAIN})`,
-            );
+            console.warn(`[Auth] Rejected: ${user.email} (no invite on file)`);
             showAuthError(
-              `Access restricted to ${ALLOWED_DOMAIN} accounts only. If you have an invite, please use the invite link.`,
+              "This account has no access yet. Ask for an invite link, then open it while signed in.",
             );
             auth.signOut();
             return;
@@ -262,19 +276,9 @@
           hideAuthError();
           const provider = new firebase.auth.GoogleAuthProvider();
 
-          // Only hint/force epicgames.com if NO invite is present.
-          // Holders of specific tool invites can use personal accounts.
-          const urlParams = new URLSearchParams(window.location.search);
-          if (!urlParams.has("invite")) {
-            provider.setCustomParameters({
-              hd: "epicgames.com",
-              prompt: "select_account",
-            });
-          } else {
-            provider.setCustomParameters({
-              prompt: "select_account",
-            });
-          }
+          // No hd restriction: invited external users sign in with any
+          // Google account; access is enforced after sign-in.
+          provider.setCustomParameters({ prompt: "select_account" });
 
           await auth.signInWithPopup(provider);
         } catch (error) {
@@ -399,23 +403,28 @@
             return;
           }
 
+          const role = document.getElementById("invite-role").value;
+          const count = Math.min(
+            50,
+            Math.max(1, parseInt(document.getElementById("invite-count").value, 10) || 1),
+          );
+
+          // Each code is single-use, so a batch is N separate invites
           const createFn = functions.httpsCallable("createInvite");
-          const result = await createFn({
-            tools: selectedTools,
-            expiresInDays: 7,
-          });
+          const results = await Promise.all(
+            Array.from({ length: count }, () =>
+              createFn({ tools: selectedTools, role, expiresInDays: 7 }),
+            ),
+          );
 
-          if (result.data.success) {
-            const inviteUrlArea = document.getElementById("invite-link-area");
-            const inviteUrlInput = document.getElementById("invite-url");
+          const baseUrl = window.location.origin + window.location.pathname;
+          const urls = results
+            .filter((r) => r.data.success)
+            .map((r) => `${baseUrl}?invite=${r.data.code}`);
 
-            // Construct the tool-specific landing URL
-            // For now, we point them to Reviewport which will handle the invite consume flow
-            const baseUrl = window.location.origin + window.location.pathname;
-            const inviteUrl = `${baseUrl}?invite=${result.data.code}`;
-
-            inviteUrlInput.value = inviteUrl;
-            inviteUrlArea.classList.add("visible");
+          if (urls.length > 0) {
+            document.getElementById("invite-url").value = urls.join("\n");
+            document.getElementById("invite-link-area").classList.add("visible");
           }
         } catch (error) {
           console.error("Invite generation error:", error);

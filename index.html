@@ -414,11 +414,35 @@
                 </label>
               </div>
 
+              <div style="display: flex; gap: 1rem; margin-bottom: 1rem">
+                <label style="font-size: 0.875rem; flex: 1">
+                  Access level<br />
+                  <select id="invite-role" class="copy-input" style="width: 100%">
+                    <option value="viewer" selected>
+                      Viewer (use only, no create/edit)
+                    </option>
+                    <option value="editor">Editor (can create and edit)</option>
+                  </select>
+                </label>
+                <label style="font-size: 0.875rem; width: 6rem">
+                  How many<br />
+                  <input
+                    type="number"
+                    id="invite-count"
+                    class="copy-input"
+                    style="width: 100%"
+                    min="1"
+                    max="50"
+                    value="1"
+                  />
+                </label>
+              </div>
+
               <button
                 class="btn btn-primary system-btn"
                 onclick="generateInviteLink()"
               >
-                <i class="fas fa-link"></i> Generate Invite Link
+                <i class="fas fa-link"></i> Generate Invite Links
               </button>
 
               <div class="invite-link-area" id="invite-link-area">
@@ -432,12 +456,12 @@
                   Invite Code Generated:
                 </div>
                 <div class="copy-area">
-                  <input
-                    type="text"
+                  <textarea
                     class="copy-input"
                     id="invite-url"
+                    rows="4"
                     readonly
-                  />
+                  ></textarea>
                   <button class="btn btn-secondary" onclick="copyInviteUrl()">
                     <i class="fas fa-copy"></i>
                   </button>

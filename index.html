@@ -440,32 +440,28 @@
 
               <button
                 class="btn btn-primary system-btn"
-                onclick="generateInviteLink()"
+                onclick="generateInviteLink(event)"
               >
                 <i class="fas fa-link"></i> Generate Invite Links
               </button>
 
               <div class="invite-link-area" id="invite-link-area">
                 <div
+                  id="invite-list-heading"
                   style="
                     font-size: 0.75rem;
                     color: var(--accent-green);
                     margin-top: 1rem;
                   "
+                ></div>
+                <div id="invite-list"></div>
+                <button
+                  class="btn btn-secondary"
+                  style="margin-top: 1rem"
+                  onclick="copyAllInvites(event)"
                 >
-                  Invite Code Generated:
-                </div>
-                <div class="copy-area">
-                  <textarea
-                    class="copy-input"
-                    id="invite-url"
-                    rows="4"
-                    readonly
-                  ></textarea>
-                  <button class="btn btn-secondary" onclick="copyInviteUrl()">
-                    <i class="fas fa-copy"></i>
-                  </button>
-                </div>
+                  <i class="fas fa-copy"></i> Copy All Invites
+                </button>
               </div>
             </div>
 
